@@ -22,15 +22,15 @@ def configure(conf):
 
 def build(bld):
   obj = bld.new_task_gen('cxx', 'shlib', 'node_addon')
-  obj.target = '_geode'
-  obj.source = "_geode.cc"
+  obj.target = '_geonode'
+  obj.source = "_geonode.cc"
   obj.uselib = "GEOS"
 
 def shutdown():
-  # HACK to get _geode.node out of build directory.
+  # HACK to get _geonode.node out of build directory.
   # better way to do this?
   if Options.commands['clean']:
-    if exists('_geode.node'): unlink('_geode.node')
+    if exists('_geonode.node'): unlink('_geonode.node')
   else:
-    if exists('build/default/geode.node') and not exists('geode.node'):
-      symlink('build/default/geode.node', 'geode.node')
+    if exists('build/default/geonode.node') and not exists('geonode.node'):
+      symlink('build/default/geonode.node', 'geonode.node')
