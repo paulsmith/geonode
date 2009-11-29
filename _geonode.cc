@@ -9,10 +9,8 @@ using namespace v8;
 using namespace node;
 
 /* notice_handler & error_handler -- required functions to initialize GEOS */
-
 // TODO: what to do here?? Is printing to stderr the best thing to do ... ?
-void
-notice_handler(const char *fmt, ...)
+void notice_handler(const char *fmt, ...)
 {
     va_list ap;
     fprintf(stderr, "NOTICE: ");
@@ -22,8 +20,7 @@ notice_handler(const char *fmt, ...)
     fprintf(stderr, "\n");
 }
 
-void
-error_handler(const char *fmt, ...)
+void error_handler(const char *fmt, ...)
 {
     char buf[256];
     va_list ap;
@@ -47,6 +44,7 @@ public:
 
     ~Geometry()
     {
+	// FIXME we also need to release any char* returned from GEOS functions
 	if (geos_geom_ != NULL)
 	    GEOSGeom_destroy(geos_geom_);
     }
@@ -63,6 +61,7 @@ public:
 
 	NODE_SET_PROTOTYPE_METHOD(t, "fromWkt", FromWKT);
 	NODE_SET_PROTOTYPE_METHOD(t, "toWkt", ToWKT);
+	NODE_SET_PROTOTYPE_METHOD(t, "contains", Contains);
 
 	target->Set(String::NewSymbol("Geometry"), t->GetFunction());
     }
@@ -73,21 +72,7 @@ public:
 
 	geos_geom_ = GEOSWKTReader_read(wkt_reader, wkt);
 
-	if (geos_geom_ == NULL) {
-	    return false;
-	}
-
-	return true;
-    }
-
-    const char* ToWKT()
-    {
-	if (!geos_geom_)
-	    return "";
-
-	GEOSWKTWriter *wkt_writer = GEOSWKTWriter_create();
-
-	return GEOSWKTWriter_write(wkt_writer, geos_geom_);
+	return geos_geom_ == NULL ? false : true;
     }
 
 protected:
@@ -119,7 +104,7 @@ protected:
 	bool r = geom->FromWKT(*wkt);
 
 	if (!r) {
-	    return ThrowException(String::New("Invalid WKT"));
+	    return ThrowException(String::New("invalid WKT"));
 	}
 
 	return Undefined();
@@ -127,16 +112,40 @@ protected:
 
     static Handle<Value> ToWKT(const Arguments& args)
     {
+	Local<Value> wktjs;
+	GEOSWKTWriter *wkt_writer = GEOSWKTWriter_create();
 	Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());
 
 	HandleScope scope;
 
-	return String::New(geom->ToWKT());
+	if (geom->geos_geom_ != NULL) {
+	    char *wkt = GEOSWKTWriter_write(wkt_writer, geom->geos_geom_);
+	    wktjs = String::New(wkt);
+	    GEOSFree(wkt);
+	} else {
+	    wktjs = String::New("");
+	}
+	return scope.Close(wktjs);
     }
 
-    static Handle<Value> ToString(const Arguments& args)
+    static Handle<Value> Contains(const Arguments& args)
     {
-	return ToWKT(args);
+	Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());
+
+	HandleScope scope;
+
+	if (args.Length() != 1) {
+	    return ThrowException(String::New("other geometry required"));
+	}
+
+	// // FIXME handle invalid type
+	Geometry *other = ObjectWrap::Unwrap<Geometry>(args[0]->ToObject());
+
+	unsigned char r = GEOSContains(geom->geos_geom_, other->geos_geom_);
+	if (r == 2) {
+	    return ThrowException(String::New("predicate contains() failed"));
+	}
+	return r ? True() : False();
     }
 };
 
@@ -148,4 +157,4 @@ init (Handle<Object> target)
     Geometry::Initialize(target);
 }
 
-// TODO: where to call finishGEOS(); ?
+// TODO: where to call finishGEOS(); ? Is it even necessary?

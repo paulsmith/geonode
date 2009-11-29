@@ -18,6 +18,5 @@ Installation
     $ git clone git://github.com/paulsmith/geonode.git
     $ cd geonode
     $ node-waf configure build
-    $ ln -s build/default/_geonode.node
 
 More tk ...
