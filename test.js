@@ -17,7 +17,7 @@ assertEquals(geom.toWkt(), "");
 
 geom.fromWkt("POINT(0 0)");
 
-// FIXME this kind of string matching is fragile with WKTs
+// FIXME this kind of string matching can be fragile with WKTs
 assertEquals(geom.toWkt(), "POINT (0.0000000000000000 0.0000000000000000)");
 
 // You can also initialize a Geometry with a WKT passed to the constructor
@@ -49,5 +49,7 @@ assertFalse(new Geometry("POLYGON((0 0, 2 2, 0 2, 2 0, 0 0))").isValid());
 assertTrue(poly.isSimple());
 
 assertTrue(poly.intersects(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")));
+assertFalse(poly.intersects(new Geometry("LINESTRING(3 3, 4 4)")));
+assertTrue(poly.intersects(new Geometry("POINT(0 0)")));
 
 sys.puts("Tests pass!");

@@ -31,5 +31,6 @@ In no particular order:
  - Prepared geometries and predicates
  - GDAL wrapper -- non-blocking reads from datasources
  - Proj wrapper
+ - Better organized unit tests
 
 More tk ...
