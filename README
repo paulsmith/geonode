@@ -2,6 +2,9 @@
 
 Brings geography to node.js.
 
+Example
+-------
+
     var geonode = require("geonode");
 
     var geom = new geonode.Geometry();
@@ -9,8 +12,8 @@ Brings geography to node.js.
     sys.puts(geom.toWkt());
 
     var geom2 = new geonode.Geometry();
-    geom2.fromWkt("POLYGON((0 0, 2 0, 2 2, 0 2, 0 0))");
-    sys.puts(geom2.covers(geom));
+    geom2.fromWkt("POLYGON((0 0, 3 0, 3 3, 0 3, 0 0))");
+    sys.puts(geom2.contains(geom)); // "true"
 
 Installation
 ------------
@@ -18,5 +21,15 @@ Installation
     $ git clone git://github.com/paulsmith/geonode.git
     $ cd geonode
     $ node-waf configure build
+
+TODO
+----
+
+In no particular order:
+
+ - R-Tree index (with asynchronous searches, inserts, updates, deletes)
+ - Prepared geometries and predicates
+ - GDAL wrapper -- non-blocking reads from datasources
+ - Proj wrapper
 
 More tk ...

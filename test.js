@@ -40,4 +40,14 @@ assertTrue(poly.contains(pt));
 assertFalse(pt.contains(poly));
 assertFalse(poly.contains(new Geometry("POINT(3 3)")));
 
+assertTrue(!poly.isEmpty());
+assertTrue(new Geometry("POINT EMPTY").isEmpty());
+
+assertTrue(poly.isValid());
+assertFalse(new Geometry("POLYGON((0 0, 2 2, 0 2, 2 0, 0 0))").isValid());
+
+assertTrue(poly.isSimple());
+
+assertTrue(poly.intersects(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")));
+
 sys.puts("Tests pass!");
