@@ -42,9 +42,10 @@ void Geometry::Initialize(Handle<Object> target)
 {
     HandleScope scope;
     Local<FunctionTemplate> t = FunctionTemplate::New(New);
-    Handle<ObjectTemplate> obj_tpl = t->InstanceTemplate();
-    obj_tpl->SetInternalFieldCount(1);
-    obj_tpl->Set(String::NewSymbol("version"), String::New(GEOSversion()));
+    Handle<ObjectTemplate> obj_template = t->InstanceTemplate();
+    obj_template->SetInternalFieldCount(1);
+    obj_template->Set(String::NewSymbol("version"), String::New(GEOSversion())); 
+    obj_template->SetAccessor(String::NewSymbol("srid"), GetSRID, SetSRID);
 
     NODE_SET_PROTOTYPE_METHOD(t, "fromWkt", FromWKT);
     NODE_SET_PROTOTYPE_METHOD(t, "toWkt", ToWKT);
@@ -132,6 +133,21 @@ GEONODE_GEOS_BINARY_PREDICATE(Contains, contains, GEOSContains);
 GEONODE_GEOS_BINARY_PREDICATE(Overlaps, overlaps, GEOSOverlaps);
 GEONODE_GEOS_BINARY_PREDICATE(Equals, equals, GEOSEquals);
 // GEONODE_GEOS_BINARY_PREDICATE(EqualsExact, equalsexact, GEOSEqualsExact); FIXME takes tolerance argument
+
+Handle<Value> Geometry::GetSRID(Local<String> name, const AccessorInfo& info)
+{
+    Geometry *geom = ObjectWrap::Unwrap<Geometry>(info.Holder());
+    const int srid = GEOSGetSRID(geom->geos_geom_);
+    if (srid == 0)
+     	return ThrowException(String::New("couldn't get SRID"));
+    return Integer::New(srid);
+}
+
+void Geometry::SetSRID(Local<String> name, Local<Value> value, const AccessorInfo& info)
+{
+    Geometry *geom = ObjectWrap::Unwrap<Geometry>(info.Holder());
+    GEOSSetSRID(geom->geos_geom_, value->Int32Value());
+}
 
 extern "C" void
 init (Handle<Object> target)
