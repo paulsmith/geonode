@@ -46,6 +46,8 @@ void Geometry::Initialize(Handle<Object> target)
     obj_template->SetInternalFieldCount(1);
     obj_template->Set(String::NewSymbol("version"), String::New(GEOSversion())); 
     obj_template->SetAccessor(String::NewSymbol("srid"), GetSRID, SetSRID);
+    obj_template->SetAccessor(String::NewSymbol("type"), GetType);
+    obj_template->SetAccessor(String::NewSymbol("area"), GetArea);
 
     NODE_SET_PROTOTYPE_METHOD(t, "fromWkt", FromWKT);
     NODE_SET_PROTOTYPE_METHOD(t, "toWkt", ToWKT);
@@ -139,7 +141,7 @@ Handle<Value> Geometry::GetSRID(Local<String> name, const AccessorInfo& info)
     Geometry *geom = ObjectWrap::Unwrap<Geometry>(info.Holder());
     const int srid = GEOSGetSRID(geom->geos_geom_);
     if (srid == 0)
-     	return ThrowException(String::New("couldn't get SRID"));
+     	return ThrowException(String::New("couldn't get SRID (maybe it wasn't set)"));
     return Integer::New(srid);
 }
 
@@ -147,6 +149,30 @@ void Geometry::SetSRID(Local<String> name, Local<Value> value, const AccessorInf
 {
     Geometry *geom = ObjectWrap::Unwrap<Geometry>(info.Holder());
     GEOSSetSRID(geom->geos_geom_, value->Int32Value());
+}
+
+Handle<Value> Geometry::GetType(Local<String> name, const AccessorInfo& info)
+{
+    HandleScope scope;
+    Geometry *geom = ObjectWrap::Unwrap<Geometry>(info.Holder());
+    char *type = GEOSGeomType(geom->geos_geom_);
+    if (type == NULL)
+     	return ThrowException(String::New("couldn't get geometry type"));
+    Handle<Value> type_obj = String::New(type);
+    GEOSFree(type);
+    return scope.Close(type_obj);
+}
+
+Handle<Value> Geometry::GetArea(Local<String> name, const AccessorInfo& info)
+{
+    HandleScope scope;
+    Geometry *geom = ObjectWrap::Unwrap<Geometry>(info.Holder());
+    double area;
+    int r = GEOSArea(geom->geos_geom_, &area);
+    if (r != 1)
+     	return ThrowException(String::New("couldn't get area"));
+    Handle<Value> area_obj = Number::New(area); 
+    return scope.Close(area_obj);
 }
 
 extern "C" void

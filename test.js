@@ -53,6 +53,11 @@ assertFalse(poly.intersects(new Geometry("LINESTRING(3 3, 4 4)")));
 assertTrue(poly.intersects(new Geometry("POINT(0 0)")));
 
 poly.srid = 4326;
-sys.puts(poly.srid);
+assertEquals(poly.srid, 4326);
+
+assertEquals(poly.type, "Polygon");
+assertEquals(new Geometry("POINT(0 0)").type, "Point");
+
+assertEquals(poly.area, 4);
 
 sys.puts("Tests pass!");

@@ -76,4 +76,6 @@ class Geometry : public ObjectWrap {
     // GEOS geometry info
     static Handle<Value> GetSRID(Local<String> name, const AccessorInfo& info);
     static void SetSRID(Local<String> name, Local<Value> value, const AccessorInfo& info);
+    static Handle<Value> GetType(Local<String> name, const AccessorInfo& info);
+    static Handle<Value> GetArea(Local<String> name, const AccessorInfo& info);
 };
