@@ -60,4 +60,8 @@ assertEquals(new Geometry("POINT(0 0)").type, "Point");
 
 assertEquals(poly.area, 4);
 
+assertEquals(new Geometry("LINESTRING(0 0, 1 1)").length, Math.sqrt(2));
+
+assertEquals(new Geometry("POINT(0 0)").distance(new Geometry("POINT(1 1)")), Math.sqrt(2));
+
 sys.puts("Tests pass!");

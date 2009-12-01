@@ -48,6 +48,7 @@ void Geometry::Initialize(Handle<Object> target)
     obj_template->SetAccessor(String::NewSymbol("srid"), GetSRID, SetSRID);
     obj_template->SetAccessor(String::NewSymbol("type"), GetType);
     obj_template->SetAccessor(String::NewSymbol("area"), GetArea);
+    obj_template->SetAccessor(String::NewSymbol("length"), GetLength);
 
     NODE_SET_PROTOTYPE_METHOD(t, "fromWkt", FromWKT);
     NODE_SET_PROTOTYPE_METHOD(t, "toWkt", ToWKT);
@@ -67,6 +68,8 @@ void Geometry::Initialize(Handle<Object> target)
     NODE_SET_PROTOTYPE_METHOD(t, "overlaps", Overlaps);
     NODE_SET_PROTOTYPE_METHOD(t, "equals", Equals);
     // NODE_SET_PROTOTYPE_METHOD(t, "equalsexact", EqualsExact); FIXME
+
+    NODE_SET_PROTOTYPE_METHOD(t, "distance", Distance);
 
     target->Set(String::NewSymbol("Geometry"), t->GetFunction());
 }
@@ -103,7 +106,6 @@ Handle<Value> Geometry::FromWKT(const Arguments& args)
     }
     return Undefined();
 }
-
 
 Handle<Value> Geometry::ToWKT(const Arguments& args)
 {
@@ -173,6 +175,33 @@ Handle<Value> Geometry::GetArea(Local<String> name, const AccessorInfo& info)
      	return ThrowException(String::New("couldn't get area"));
     Handle<Value> area_obj = Number::New(area); 
     return scope.Close(area_obj);
+}
+
+Handle<Value> Geometry::GetLength(Local<String> name, const AccessorInfo& info)
+{
+    HandleScope scope;
+    Geometry *geom = ObjectWrap::Unwrap<Geometry>(info.Holder());
+    double length;
+    int r = GEOSLength(geom->geos_geom_, &length);
+    if (r != 1)
+     	return ThrowException(String::New("couldn't get length"));
+    Handle<Value> length_obj = Number::New(length); 
+    return scope.Close(length_obj);
+}
+
+Handle<Value> Geometry::Distance(const Arguments& args)
+{
+    Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());
+    HandleScope scope;
+    if (args.Length() != 1)
+	return ThrowException(String::New("missing other geometry"));
+    Geometry *other = ObjectWrap::Unwrap<Geometry>(args[0]->ToObject());
+    double distance;
+    int r = GEOSDistance(geom->geos_geom_, other->geos_geom_, &distance);
+    if (r != 1)
+     	return ThrowException(String::New("couldn't get distance"));
+    Handle<Value> distance_obj = Number::New(distance);
+    return scope.Close(distance_obj);
 }
 
 extern "C" void
