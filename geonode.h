@@ -48,6 +48,7 @@ class Geometry : public ObjectWrap {
  public:
     GEOSGeometry *geos_geom_;
     Geometry();
+    Geometry(GEOSGeometry* geom);
     Geometry(const char* wkt);
     ~Geometry();
     static void Initialize(Handle<Object> target);
@@ -57,6 +58,8 @@ class Geometry : public ObjectWrap {
     static Handle<Value> New(const Arguments& args);
     static Handle<Value> FromWKT(const Arguments& args);
     static Handle<Value> ToWKT(const Arguments& args);
+    // GEOS topology operations
+    static Handle<Value> GetEnvelope(Local<String> name, const AccessorInfo& info);
     // GEOS unary predicates
     static Handle<Value> IsEmpty(const Arguments& args);
     static Handle<Value> IsValid(const Arguments& args);
@@ -73,14 +76,16 @@ class Geometry : public ObjectWrap {
     static Handle<Value> Overlaps(const Arguments& args);
     static Handle<Value> Equals(const Arguments& args);
     // static Handle<Value> EqualsExact(const Arguments& args); FIXME
-
     // GEOS geometry info
     static Handle<Value> GetSRID(Local<String> name, const AccessorInfo& info);
     static void SetSRID(Local<String> name, Local<Value> value, const AccessorInfo& info);
-
     // GEOS misc
     static Handle<Value> GetType(Local<String> name, const AccessorInfo& info);
     static Handle<Value> GetArea(Local<String> name, const AccessorInfo& info);
     static Handle<Value> GetLength(Local<String> name, const AccessorInfo& info);
     static Handle<Value> Distance(const Arguments& args);
+
+ private:
+    static Persistent<FunctionTemplate> geometry_template_;
+    static Handle<FunctionTemplate> MakeGeometryTemplate();
 };

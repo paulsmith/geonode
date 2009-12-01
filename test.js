@@ -64,4 +64,6 @@ assertEquals(new Geometry("LINESTRING(0 0, 1 1)").length, Math.sqrt(2));
 
 assertEquals(new Geometry("POINT(0 0)").distance(new Geometry("POINT(1 1)")), Math.sqrt(2));
 
+assertEquals(new Geometry("POLYGON((0 1, 1 0, 2 1, 1 2, 0 1))").envelope.toWkt(), "POLYGON ((0.0000000000000000 0.0000000000000000, 2.0000000000000000 0.0000000000000000, 2.0000000000000000 2.0000000000000000, 0.0000000000000000 2.0000000000000000, 0.0000000000000000 0.0000000000000000))");
+
 sys.puts("Tests pass!");

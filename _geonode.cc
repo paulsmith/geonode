@@ -26,6 +26,8 @@ void error_handler(const char *fmt, ...)
 
 Geometry::Geometry() : geos_geom_(0) {}
 
+Geometry::Geometry(GEOSGeometry* geom) : geos_geom_(geom) {}
+
 Geometry::Geometry(const char* wkt)
 {
     this->FromWKT(wkt);
@@ -38,18 +40,29 @@ Geometry::~Geometry()
 	GEOSGeom_destroy(geos_geom_);
 }
 
+Persistent<FunctionTemplate> Geometry::geometry_template_;
+
+Handle<FunctionTemplate> Geometry::MakeGeometryTemplate()
+{
+    HandleScope scope;
+    Handle<FunctionTemplate> t = FunctionTemplate::New(New);
+    Local<ObjectTemplate> obj_t = t->InstanceTemplate();
+    obj_t->SetInternalFieldCount(1);
+    obj_t->Set(String::NewSymbol("version"), String::New(GEOSversion())); 
+    obj_t->SetAccessor(String::NewSymbol("envelope"), GetEnvelope);
+    obj_t->SetAccessor(String::NewSymbol("srid"), GetSRID, SetSRID);
+    obj_t->SetAccessor(String::NewSymbol("type"), GetType);
+    obj_t->SetAccessor(String::NewSymbol("area"), GetArea);
+    obj_t->SetAccessor(String::NewSymbol("length"), GetLength);
+    return scope.Close(t);
+}
+
 void Geometry::Initialize(Handle<Object> target)
 {
     HandleScope scope;
-    Local<FunctionTemplate> t = FunctionTemplate::New(New);
-    Handle<ObjectTemplate> obj_template = t->InstanceTemplate();
-    obj_template->SetInternalFieldCount(1);
-    obj_template->Set(String::NewSymbol("version"), String::New(GEOSversion())); 
-    obj_template->SetAccessor(String::NewSymbol("srid"), GetSRID, SetSRID);
-    obj_template->SetAccessor(String::NewSymbol("type"), GetType);
-    obj_template->SetAccessor(String::NewSymbol("area"), GetArea);
-    obj_template->SetAccessor(String::NewSymbol("length"), GetLength);
-
+    if (geometry_template_.IsEmpty())
+	geometry_template_ = Persistent<FunctionTemplate>::New(MakeGeometryTemplate());
+    Handle<FunctionTemplate> t = geometry_template_;
     NODE_SET_PROTOTYPE_METHOD(t, "fromWkt", FromWKT);
     NODE_SET_PROTOTYPE_METHOD(t, "toWkt", ToWKT);
     // Unary predicates
@@ -137,6 +150,19 @@ GEONODE_GEOS_BINARY_PREDICATE(Contains, contains, GEOSContains);
 GEONODE_GEOS_BINARY_PREDICATE(Overlaps, overlaps, GEOSOverlaps);
 GEONODE_GEOS_BINARY_PREDICATE(Equals, equals, GEOSEquals);
 // GEONODE_GEOS_BINARY_PREDICATE(EqualsExact, equalsexact, GEOSEqualsExact); FIXME takes tolerance argument
+
+Handle<Value> Geometry::GetEnvelope(Local<String> name, const AccessorInfo& info)
+{
+    HandleScope scope;
+    Geometry *geom = ObjectWrap::Unwrap<Geometry>(info.Holder());
+    GEOSGeometry *geos_env = GEOSEnvelope(geom->geos_geom_);
+    if (geos_env == NULL)
+	return ThrowException(String::New("couldn't get envelope"));
+    Geometry *env = new Geometry(geos_env);
+    Local<Object> geometry_obj = geometry_template_->InstanceTemplate()->NewInstance();
+    geometry_obj->SetInternalField(0, External::New(env));
+    return scope.Close(geometry_obj);
+}
 
 Handle<Value> Geometry::GetSRID(Local<String> name, const AccessorInfo& info)
 {
