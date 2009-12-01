@@ -160,7 +160,7 @@ Handle<Value> Geometry::GetEnvelope(Local<String> name, const AccessorInfo& info
 	return ThrowException(String::New("couldn't get envelope"));
     Geometry *env = new Geometry(geos_env);
     Local<Object> geometry_obj = geometry_template_->InstanceTemplate()->NewInstance();
-    geometry_obj->SetInternalField(0, External::New(env));
+    env->Wrap(geometry_obj);
     return scope.Close(geometry_obj);
 }
 
