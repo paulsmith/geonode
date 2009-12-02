@@ -52,6 +52,7 @@ Handle<FunctionTemplate> Geometry::MakeGeometryTemplate()
     obj_t->SetAccessor(String::NewSymbol("envelope"), GetEnvelope);
     obj_t->SetAccessor(String::NewSymbol("convexHull"), GetConvexHull);
     obj_t->SetAccessor(String::NewSymbol("boundary"), GetBoundary);
+    obj_t->SetAccessor(String::NewSymbol("pointOnSurface"), GetPointOnSurface);
     obj_t->SetAccessor(String::NewSymbol("srid"), GetSRID, SetSRID);
     obj_t->SetAccessor(String::NewSymbol("type"), GetType);
     obj_t->SetAccessor(String::NewSymbol("area"), GetArea);
@@ -170,6 +171,7 @@ GEONODE_GEOS_BINARY_PREDICATE(Equals, equals, GEOSEquals);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetEnvelope, envelope, GEOSEnvelope);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetConvexHull, convexHull, GEOSConvexHull);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetBoundary, boundary, GEOSBoundary);
+GEONODE_GEOS_UNARY_TOPOLOGY(GetPointOnSurface, pointOnSurface, GEOSPointOnSurface);
 GEONODE_GEOS_BINARY_TOPOLOGY(Intersection, intersection, GEOSIntersection);
 GEONODE_GEOS_BINARY_TOPOLOGY(Difference, difference, GEOSDifference);
 GEONODE_GEOS_BINARY_TOPOLOGY(SymDifference, symDifference, GEOSSymDifference);

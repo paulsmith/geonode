@@ -76,14 +76,16 @@ assertGeomsEqual(poly.intersection(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 
 
 assertGeomsEqual(new Geometry("POINT(1 1)").buffer(1, 1), new Geometry("POLYGON ((2.0000000000000000 1.0000000000000000, 1.0000000000000016 0.0000000000000000, 0.0000000000000000 0.9999999999999968, 0.9999999999999953 2.0000000000000000, 2.0000000000000000 1.0000000000000000))"));
 
-assertGeomsEqual(new Geometry("POLYGON((1 1, 3 2, 2 1, 3 0, 1 1))").convexHull, new Geometry("POLYGON ((1 0, 3 0, 3 2, 1 2, 1 0))"));
+assertGeomsEqual(new Geometry("POLYGON((1 1, 3 2, 2 1, 3 0, 1 1))").convexHull, new Geometry("POLYGON ((3 0, 1 1, 3 2, 3 0))"));
 
 assertGeomsEqual(poly.difference(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")), new Geometry("POLYGON ((0 0, 0 2, 1 2, 1 1, 2 1, 2 0, 0 0))"));
 
 assertGeomsEqual(poly.symDifference(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")), new Geometry("MULTIPOLYGON (((0 0, 0 2, 1 2, 1 1, 2 1, 2 0, 0 0)), ((2 1, 2 2, 1 2, 1 3, 3 3, 3 1, 2 1)))"));
 
-assertGeomsEqual(new Geometry("LINESTRING(1 1, 0 0, -1 1)").boundary, new Geometry("POLYGON ((-1 0, 1 0, 1 1, -1 1, -1 0))"));
+assertGeomsEqual(new Geometry("LINESTRING(1 1, 0 0, -1 1)").boundary, new Geometry("MULTIPOINT(1 1, -1 1)"));
 
 assertGeomsEqual(poly.union(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")), new Geometry("POLYGON ((0 0, 0 2, 1 2, 1 3, 3 3, 3 1, 2 1, 2 0, 0 0))"));
+
+assertGeomsEqual(poly.pointOnSurface, new Geometry("POINT(1 1)"));
 
 sys.puts("Tests pass!");

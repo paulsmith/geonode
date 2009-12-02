@@ -15,7 +15,7 @@
     {									\
 	HandleScope scope;						\
 	Geometry *geom = ObjectWrap::Unwrap<Geometry>(info.Holder());	\
-	GEOSGeometry *geos_geom = GEOSEnvelope(geom->geos_geom_);	\
+	GEOSGeometry *geos_geom = geosfn(geom->geos_geom_);	\
 	if (geos_geom == NULL)						\
 	    return ThrowException(String::New("couldn't get "#jsmethod)); \
 	Handle<Object> geometry_obj = WrapNewGEOSGeometry(geos_geom);	\
@@ -98,6 +98,7 @@ class Geometry : public ObjectWrap {
     static Handle<Value> SymDifference(const Arguments& args);
     static Handle<Value> GetBoundary(Local<String> name, const AccessorInfo& info);
     static Handle<Value> Union(const Arguments& args);
+    static Handle<Value> GetPointOnSurface(Local<String> name, const AccessorInfo& info);
     // GEOS unary predicates
     static Handle<Value> IsEmpty(const Arguments& args);
     static Handle<Value> IsValid(const Arguments& args);
