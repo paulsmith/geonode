@@ -20,7 +20,7 @@
 	    return ThrowException(String::New("couldn't get "#jsmethod)); \
 	Handle<Object> geometry_obj = WrapNewGEOSGeometry(geos_geom);	\
 	return scope.Close(geometry_obj);				\
-    };									
+    };
 
 #define GEONODE_GEOS_BINARY_TOPOLOGY(cppmethod, jsmethod, geosfn)	\
     Handle<Value> Geometry::cppmethod(const Arguments& args)		\
@@ -39,7 +39,7 @@
 
 /**
  * A convenience for defining repetitive wrappers of GEOS unary
- * predicate functions. 
+ * predicate functions.
  */
 #define GEONODE_GEOS_UNARY_PREDICATE(cppmethod, jsmethod, geosfn)	\
     Handle<Value> Geometry::cppmethod(const Arguments& args)		\
@@ -54,7 +54,7 @@
 
 /**
  * A convenience for defining repetitive wrappers of GEOS binary
- * predicate functions. 
+ * predicate functions.
  */
 #define GEONODE_GEOS_BINARY_PREDICATE(cppmethod, jsmethod, geosfn)	\
     Handle<Value> Geometry::cppmethod(const Arguments& args)		\

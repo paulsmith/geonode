@@ -15,7 +15,7 @@ assertInstanceof(geom, Geometry);
 
 // FIXME this match should be more flexible -- other users probably
 // won't have this exact version of the GEOS C library
-assertEquals(geom.version, "3.1.1-CAPI-1.6.0"); 
+assertEquals(geom.version, "3.1.1-CAPI-1.6.0");
 
 assertEquals(geom.toWkt(), "");
 

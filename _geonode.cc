@@ -48,7 +48,7 @@ Handle<FunctionTemplate> Geometry::MakeGeometryTemplate()
     Handle<FunctionTemplate> t = FunctionTemplate::New(New);
     Local<ObjectTemplate> obj_t = t->InstanceTemplate();
     obj_t->SetInternalFieldCount(1);
-    obj_t->Set(String::NewSymbol("version"), String::New(GEOSversion())); 
+    obj_t->Set(String::NewSymbol("version"), String::New(GEOSversion()));
     obj_t->SetAccessor(String::NewSymbol("envelope"), GetEnvelope);
     obj_t->SetAccessor(String::NewSymbol("convexHull"), GetConvexHull);
     obj_t->SetAccessor(String::NewSymbol("boundary"), GetBoundary);
@@ -230,7 +230,7 @@ Handle<Value> Geometry::GetArea(Local<String> name, const AccessorInfo& info)
     int r = GEOSArea(geom->geos_geom_, &area);
     if (r != 1)
      	return ThrowException(String::New("couldn't get area"));
-    Handle<Value> area_obj = Number::New(area); 
+    Handle<Value> area_obj = Number::New(area);
     return scope.Close(area_obj);
 }
 
@@ -242,7 +242,7 @@ Handle<Value> Geometry::GetLength(Local<String> name, const AccessorInfo& info)
     int r = GEOSLength(geom->geos_geom_, &length);
     if (r != 1)
      	return ThrowException(String::New("couldn't get length"));
-    Handle<Value> length_obj = Number::New(length); 
+    Handle<Value> length_obj = Number::New(length);
     return scope.Close(length_obj);
 }
 
