@@ -28,9 +28,16 @@ TODO
 In no particular order:
 
  - R-Tree index (with asynchronous searches, inserts, updates, deletes)
- - Prepared geometries and predicates
+ - Prepared geometries and predicates (contains, intersects, within)
  - GDAL wrapper -- non-blocking reads from datasources
  - Proj wrapper
- - Better organized unit tests
+ - Better organized unit tests, more coverage
+ - GeoJSON read/write
 
 More tk ...
+
+--
+Paul Smith
+
+@paulsmith
+pauladamsmith.com
