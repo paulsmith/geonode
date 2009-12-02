@@ -82,4 +82,6 @@ assertGeomsEqual(poly.difference(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1)
 
 assertGeomsEqual(poly.symDifference(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")), new Geometry("MULTIPOLYGON (((0 0, 0 2, 1 2, 1 1, 2 1, 2 0, 0 0)), ((2 1, 2 2, 1 2, 1 3, 3 3, 3 1, 2 1)))"));
 
+assertGeomsEqual(new Geometry("LINESTRING(1 1, 0 0, -1 1)").boundary, new Geometry("POLYGON ((-1 0, 1 0, 1 1, -1 1, -1 0))"));
+
 sys.puts("Tests pass!");

@@ -96,6 +96,7 @@ class Geometry : public ObjectWrap {
     static Handle<Value> GetConvexHull(Local<String> name, const AccessorInfo& info);
     static Handle<Value> Difference(const Arguments& args);
     static Handle<Value> SymDifference(const Arguments& args);
+    static Handle<Value> GetBoundary(Local<String> name, const AccessorInfo& info);
     // GEOS unary predicates
     static Handle<Value> IsEmpty(const Arguments& args);
     static Handle<Value> IsValid(const Arguments& args);
