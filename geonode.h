@@ -8,19 +8,34 @@
 
 /**
  * A convenience for defining repetitive wrappers of GEOS unary
- * topology functions.
+ * topology functions which return a new geometry.
  */
 #define GEONODE_GEOS_UNARY_TOPOLOGY(cppmethod, jsmethod, geosfn)        \
     Handle<Value> Geometry::cppmethod(Local<String> name, const AccessorInfo& info) \
     {									\
-    HandleScope scope;							\
-    Geometry *geom = ObjectWrap::Unwrap<Geometry>(info.Holder());	\
-    GEOSGeometry *geos_geom = GEOSEnvelope(geom->geos_geom_);		\
-    if (geos_geom == NULL)						\
-	return ThrowException(String::New("couldn't get "#jsmethod));	\
-    Handle<Object> geometry_obj = WrapNewGEOSGeometry(geos_geom);	\
-    return scope.Close(geometry_obj);					\
+	HandleScope scope;						\
+	Geometry *geom = ObjectWrap::Unwrap<Geometry>(info.Holder());	\
+	GEOSGeometry *geos_geom = GEOSEnvelope(geom->geos_geom_);	\
+	if (geos_geom == NULL)						\
+	    return ThrowException(String::New("couldn't get "#jsmethod)); \
+	Handle<Object> geometry_obj = WrapNewGEOSGeometry(geos_geom);	\
+	return scope.Close(geometry_obj);				\
     };									
+
+#define GEONODE_GEOS_BINARY_TOPOLOGY(cppmethod, jsmethod, geosfn)	\
+    Handle<Value> Geometry::cppmethod(const Arguments& args)		\
+    {									\
+	HandleScope scope;						\
+	if (args.Length() != 1)						\
+	    return ThrowException(String::New("requires other geometry argument")); \
+	Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());	\
+	Geometry *other = ObjectWrap::Unwrap<Geometry>(args[0]->ToObject()); \
+	GEOSGeometry *geos_geom = geosfn(geom->geos_geom_, other->geos_geom_); \
+	if (geos_geom == NULL)						\
+	    return ThrowException(String::New("couldn't get "#jsmethod)); \
+	Handle<Object> geometry_obj = WrapNewGEOSGeometry(geos_geom);	\
+	return scope.Close(geometry_obj);				\
+    };
 
 /**
  * A convenience for defining repetitive wrappers of GEOS unary
@@ -79,6 +94,8 @@ class Geometry : public ObjectWrap {
     static Handle<Value> Intersection(const Arguments& args);
     static Handle<Value> Buffer(const Arguments& args);
     static Handle<Value> GetConvexHull(Local<String> name, const AccessorInfo& info);
+    static Handle<Value> Difference(const Arguments& args);
+    static Handle<Value> SymDifference(const Arguments& args);
     // GEOS unary predicates
     static Handle<Value> IsEmpty(const Arguments& args);
     static Handle<Value> IsValid(const Arguments& args);

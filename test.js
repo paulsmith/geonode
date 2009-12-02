@@ -74,4 +74,8 @@ assertEquals(new Geometry("POINT(1 1)").buffer(1, 1).toWkt(), "POLYGON ((2.00000
 
 assertEquals(new Geometry("POLYGON((1 1, 3 2, 2 1, 3 0, 1 1))").convexHull.toWkt(), new Geometry("POLYGON ((1 0, 3 0, 3 2, 1 2, 1 0))").toWkt());
 
+assertEquals(poly.difference(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")).toWkt(), new Geometry("POLYGON ((0 0, 0 2, 1 2, 1 1, 2 1, 2 0, 0 0))").toWkt());
+
+assertEquals(poly.symDifference(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")).toWkt(), new Geometry("MULTIPOLYGON (((0 0, 0 2, 1 2, 1 1, 2 1, 2 0, 0 0)), ((2 1, 2 2, 1 2, 1 3, 3 3, 3 1, 2 1)))").toWkt());
+
 sys.puts("Tests pass!");

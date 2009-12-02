@@ -78,6 +78,8 @@ void Geometry::Initialize(Handle<Object> target)
     // Topology operations
     NODE_SET_PROTOTYPE_METHOD(t, "intersection", Intersection);
     NODE_SET_PROTOTYPE_METHOD(t, "buffer", Buffer);
+    NODE_SET_PROTOTYPE_METHOD(t, "difference", Difference);
+    NODE_SET_PROTOTYPE_METHOD(t, "symDifference", SymDifference);
     // Unary predicates
     NODE_SET_PROTOTYPE_METHOD(t, "isEmpty", IsEmpty);
     NODE_SET_PROTOTYPE_METHOD(t, "isValid", IsValid);
@@ -166,20 +168,9 @@ GEONODE_GEOS_BINARY_PREDICATE(Equals, equals, GEOSEquals);
 
 GEONODE_GEOS_UNARY_TOPOLOGY(GetEnvelope, envelope, GEOSEnvelope);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetConvexHull, convexHull, GEOSConvexHull);
-
-Handle<Value> Geometry::Intersection(const Arguments& args)
-{
-    HandleScope scope;
-    if (args.Length() != 1)
-	return ThrowException(String::New("requires other geometry argument"));
-    Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());
-    Geometry *other = ObjectWrap::Unwrap<Geometry>(args[0]->ToObject());
-    GEOSGeometry *intersection = GEOSIntersection(geom->geos_geom_, other->geos_geom_);
-    if (intersection == NULL)
-	return ThrowException(String::New("couldn't get intersection"));
-    Handle<Object> geometry_obj = WrapNewGEOSGeometry(intersection);
-    return scope.Close(geometry_obj);
-}
+GEONODE_GEOS_BINARY_TOPOLOGY(Intersection, intersection, GEOSIntersection);
+GEONODE_GEOS_BINARY_TOPOLOGY(Difference, difference, GEOSDifference);
+GEONODE_GEOS_BINARY_TOPOLOGY(SymDifference, symDifference, GEOSSymDifference);
 
 Handle<Value> Geometry::Buffer(const Arguments& args)
 {
