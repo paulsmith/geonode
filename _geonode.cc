@@ -65,6 +65,8 @@ void Geometry::Initialize(Handle<Object> target)
     Handle<FunctionTemplate> t = geometry_template_;
     NODE_SET_PROTOTYPE_METHOD(t, "fromWkt", FromWKT);
     NODE_SET_PROTOTYPE_METHOD(t, "toWkt", ToWKT);
+    // Topology operations
+    NODE_SET_PROTOTYPE_METHOD(t, "intersection", Intersection);
     // Unary predicates
     NODE_SET_PROTOTYPE_METHOD(t, "isEmpty", IsEmpty);
     NODE_SET_PROTOTYPE_METHOD(t, "isValid", IsValid);
@@ -158,9 +160,23 @@ Handle<Value> Geometry::GetEnvelope(Local<String> name, const AccessorInfo& info
     GEOSGeometry *geos_env = GEOSEnvelope(geom->geos_geom_);
     if (geos_env == NULL)
 	return ThrowException(String::New("couldn't get envelope"));
-    Geometry *env = new Geometry(geos_env);
     Local<Object> geometry_obj = geometry_template_->InstanceTemplate()->NewInstance();
-    env->Wrap(geometry_obj);
+    (new Geometry(geos_env))->Wrap(geometry_obj);
+    return scope.Close(geometry_obj);
+}
+
+Handle<Value> Geometry::Intersection(const Arguments& args)
+{
+    HandleScope scope;
+    if (args.Length() != 1)
+	return ThrowException(String::New("requires other geometry argument"));
+    Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());
+    Geometry *other = ObjectWrap::Unwrap<Geometry>(args[0]->ToObject());
+    GEOSGeometry *intersection = GEOSIntersection(geom->geos_geom_, other->geos_geom_);
+    if (intersection == NULL)
+	return ThrowException(String::New("couldn't get intersection"));
+    Local<Object> geometry_obj = geometry_template_->InstanceTemplate()->NewInstance();
+    (new Geometry(intersection))->Wrap(geometry_obj);
     return scope.Close(geometry_obj);
 }
 

@@ -66,4 +66,6 @@ assertEquals(new Geometry("POINT(0 0)").distance(new Geometry("POINT(1 1)")), Ma
 
 assertEquals(new Geometry("POLYGON((0 1, 1 0, 2 1, 1 2, 0 1))").envelope.toWkt(), new Geometry("POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))").toWkt());
 
+assertEquals(poly.intersection(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")).toWkt(), new Geometry("POLYGON((1 2, 2 2, 2 1, 1 1, 1 2))").toWkt());
+
 sys.puts("Tests pass!");

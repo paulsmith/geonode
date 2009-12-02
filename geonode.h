@@ -60,6 +60,7 @@ class Geometry : public ObjectWrap {
     static Handle<Value> ToWKT(const Arguments& args);
     // GEOS topology operations
     static Handle<Value> GetEnvelope(Local<String> name, const AccessorInfo& info);
+    static Handle<Value> Intersection(const Arguments& args);
     // GEOS unary predicates
     static Handle<Value> IsEmpty(const Arguments& args);
     static Handle<Value> IsValid(const Arguments& args);
