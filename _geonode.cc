@@ -81,6 +81,7 @@ void Geometry::Initialize(Handle<Object> target)
     NODE_SET_PROTOTYPE_METHOD(t, "buffer", Buffer);
     NODE_SET_PROTOTYPE_METHOD(t, "difference", Difference);
     NODE_SET_PROTOTYPE_METHOD(t, "symDifference", SymDifference);
+    NODE_SET_PROTOTYPE_METHOD(t, "union", Union);
     // Unary predicates
     NODE_SET_PROTOTYPE_METHOD(t, "isEmpty", IsEmpty);
     NODE_SET_PROTOTYPE_METHOD(t, "isValid", IsValid);
@@ -172,6 +173,7 @@ GEONODE_GEOS_UNARY_TOPOLOGY(GetBoundary, boundary, GEOSBoundary);
 GEONODE_GEOS_BINARY_TOPOLOGY(Intersection, intersection, GEOSIntersection);
 GEONODE_GEOS_BINARY_TOPOLOGY(Difference, difference, GEOSDifference);
 GEONODE_GEOS_BINARY_TOPOLOGY(SymDifference, symDifference, GEOSSymDifference);
+GEONODE_GEOS_BINARY_TOPOLOGY(Union, union, GEOSUnion);
 
 Handle<Value> Geometry::Buffer(const Arguments& args)
 {
