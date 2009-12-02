@@ -61,6 +61,7 @@ class Geometry : public ObjectWrap {
     // GEOS topology operations
     static Handle<Value> GetEnvelope(Local<String> name, const AccessorInfo& info);
     static Handle<Value> Intersection(const Arguments& args);
+    static Handle<Value> Buffer(const Arguments& args);
     // GEOS unary predicates
     static Handle<Value> IsEmpty(const Arguments& args);
     static Handle<Value> IsValid(const Arguments& args);
@@ -89,4 +90,5 @@ class Geometry : public ObjectWrap {
  private:
     static Persistent<FunctionTemplate> geometry_template_;
     static Handle<FunctionTemplate> MakeGeometryTemplate();
+    static Handle<Object> WrapNewGEOSGeometry(GEOSGeometry *geos_geom);
 };

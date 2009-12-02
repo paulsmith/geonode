@@ -57,6 +57,15 @@ Handle<FunctionTemplate> Geometry::MakeGeometryTemplate()
     return scope.Close(t);
 }
 
+Handle<Object> Geometry::WrapNewGEOSGeometry(GEOSGeometry *geos_geom)
+{
+    HandleScope scope;
+    Local<Object> geom_obj = geometry_template_->InstanceTemplate()->NewInstance();
+    Geometry *geom = new Geometry(geos_geom);
+    geom->Wrap(geom_obj);
+    return scope.Close(geom_obj);
+}
+
 void Geometry::Initialize(Handle<Object> target)
 {
     HandleScope scope;
@@ -67,6 +76,7 @@ void Geometry::Initialize(Handle<Object> target)
     NODE_SET_PROTOTYPE_METHOD(t, "toWkt", ToWKT);
     // Topology operations
     NODE_SET_PROTOTYPE_METHOD(t, "intersection", Intersection);
+    NODE_SET_PROTOTYPE_METHOD(t, "buffer", Buffer);
     // Unary predicates
     NODE_SET_PROTOTYPE_METHOD(t, "isEmpty", IsEmpty);
     NODE_SET_PROTOTYPE_METHOD(t, "isValid", IsValid);
@@ -175,9 +185,28 @@ Handle<Value> Geometry::Intersection(const Arguments& args)
     GEOSGeometry *intersection = GEOSIntersection(geom->geos_geom_, other->geos_geom_);
     if (intersection == NULL)
 	return ThrowException(String::New("couldn't get intersection"));
-    Local<Object> geometry_obj = geometry_template_->InstanceTemplate()->NewInstance();
-    (new Geometry(intersection))->Wrap(geometry_obj);
+    Handle<Object> geometry_obj = WrapNewGEOSGeometry(intersection);
     return scope.Close(geometry_obj);
+}
+
+Handle<Value> Geometry::Buffer(const Arguments& args)
+{
+    HandleScope scope;
+    double width;
+    int quadsegs = 8;
+    if (args.Length() < 1)
+	return ThrowException(String::New("requires width argument"));
+    if (!args[0]->IsNumber())
+	return ThrowException(Exception::TypeError(String::New("width argument must be a number")));
+    Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());
+    width = args[0]->NumberValue();
+    if (args.Length() == 2)
+	quadsegs = args[1]->Int32Value();
+    GEOSGeometry *buffer = GEOSBuffer(geom->geos_geom_, width, quadsegs);
+    if (buffer == NULL)
+	return ThrowException(String::New("couldn't buffer geometry"));
+    Handle<Object> buffer_obj = WrapNewGEOSGeometry(buffer);
+    return scope.Close(buffer_obj);
 }
 
 Handle<Value> Geometry::GetSRID(Local<String> name, const AccessorInfo& info)
