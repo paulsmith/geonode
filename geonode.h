@@ -99,6 +99,7 @@ class Geometry : public ObjectWrap {
     static Handle<Value> GetBoundary(Local<String> name, const AccessorInfo& info);
     static Handle<Value> Union(const Arguments& args);
     static Handle<Value> GetPointOnSurface(Local<String> name, const AccessorInfo& info);
+    static Handle<Value> GetCentroid(Local<String> name, const AccessorInfo& info);
     // GEOS unary predicates
     static Handle<Value> IsEmpty(const Arguments& args);
     static Handle<Value> IsValid(const Arguments& args);

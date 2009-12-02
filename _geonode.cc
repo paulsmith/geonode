@@ -42,6 +42,15 @@ Geometry::~Geometry()
 
 Persistent<FunctionTemplate> Geometry::geometry_template_;
 
+Handle<Object> Geometry::WrapNewGEOSGeometry(GEOSGeometry *geos_geom)
+{
+    HandleScope scope;
+    Local<Object> geom_obj = geometry_template_->InstanceTemplate()->NewInstance();
+    Geometry *geom = new Geometry(geos_geom);
+    geom->Wrap(geom_obj);
+    return scope.Close(geom_obj);
+}
+
 Handle<FunctionTemplate> Geometry::MakeGeometryTemplate()
 {
     HandleScope scope;
@@ -53,20 +62,12 @@ Handle<FunctionTemplate> Geometry::MakeGeometryTemplate()
     obj_t->SetAccessor(String::NewSymbol("convexHull"), GetConvexHull);
     obj_t->SetAccessor(String::NewSymbol("boundary"), GetBoundary);
     obj_t->SetAccessor(String::NewSymbol("pointOnSurface"), GetPointOnSurface);
+    obj_t->SetAccessor(String::NewSymbol("centroid"), GetCentroid);
     obj_t->SetAccessor(String::NewSymbol("srid"), GetSRID, SetSRID);
     obj_t->SetAccessor(String::NewSymbol("type"), GetType);
     obj_t->SetAccessor(String::NewSymbol("area"), GetArea);
     obj_t->SetAccessor(String::NewSymbol("length"), GetLength);
     return scope.Close(t);
-}
-
-Handle<Object> Geometry::WrapNewGEOSGeometry(GEOSGeometry *geos_geom)
-{
-    HandleScope scope;
-    Local<Object> geom_obj = geometry_template_->InstanceTemplate()->NewInstance();
-    Geometry *geom = new Geometry(geos_geom);
-    geom->Wrap(geom_obj);
-    return scope.Close(geom_obj);
 }
 
 void Geometry::Initialize(Handle<Object> target)
@@ -172,6 +173,7 @@ GEONODE_GEOS_UNARY_TOPOLOGY(GetEnvelope, envelope, GEOSEnvelope);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetConvexHull, convexHull, GEOSConvexHull);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetBoundary, boundary, GEOSBoundary);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetPointOnSurface, pointOnSurface, GEOSPointOnSurface);
+GEONODE_GEOS_UNARY_TOPOLOGY(GetCentroid, centroid, GEOSGetCentroid);
 GEONODE_GEOS_BINARY_TOPOLOGY(Intersection, intersection, GEOSIntersection);
 GEONODE_GEOS_BINARY_TOPOLOGY(Difference, difference, GEOSDifference);
 GEONODE_GEOS_BINARY_TOPOLOGY(SymDifference, symDifference, GEOSSymDifference);
