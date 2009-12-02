@@ -72,4 +72,6 @@ assertEquals(new Geometry("POINT(1 1)").buffer(1).toWkt(), "POLYGON ((2.00000000
 
 assertEquals(new Geometry("POINT(1 1)").buffer(1, 1).toWkt(), "POLYGON ((2.0000000000000000 1.0000000000000000, 1.0000000000000016 0.0000000000000000, 0.0000000000000000 0.9999999999999968, 0.9999999999999953 2.0000000000000000, 2.0000000000000000 1.0000000000000000))");
 
+assertEquals(new Geometry("POLYGON((1 1, 3 2, 2 1, 3 0, 1 1))").convexHull.toWkt(), new Geometry("POLYGON ((1 0, 3 0, 3 2, 1 2, 1 0))").toWkt());
+
 sys.puts("Tests pass!");

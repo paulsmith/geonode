@@ -8,6 +8,22 @@
 
 /**
  * A convenience for defining repetitive wrappers of GEOS unary
+ * topology functions.
+ */
+#define GEONODE_GEOS_UNARY_TOPOLOGY(cppmethod, jsmethod, geosfn)        \
+    Handle<Value> Geometry::cppmethod(Local<String> name, const AccessorInfo& info) \
+    {									\
+    HandleScope scope;							\
+    Geometry *geom = ObjectWrap::Unwrap<Geometry>(info.Holder());	\
+    GEOSGeometry *geos_geom = GEOSEnvelope(geom->geos_geom_);		\
+    if (geos_geom == NULL)						\
+	return ThrowException(String::New("couldn't get "#jsmethod));	\
+    Handle<Object> geometry_obj = WrapNewGEOSGeometry(geos_geom);	\
+    return scope.Close(geometry_obj);					\
+    };									
+
+/**
+ * A convenience for defining repetitive wrappers of GEOS unary
  * predicate functions. 
  */
 #define GEONODE_GEOS_UNARY_PREDICATE(cppmethod, jsmethod, geosfn)	\
@@ -62,6 +78,7 @@ class Geometry : public ObjectWrap {
     static Handle<Value> GetEnvelope(Local<String> name, const AccessorInfo& info);
     static Handle<Value> Intersection(const Arguments& args);
     static Handle<Value> Buffer(const Arguments& args);
+    static Handle<Value> GetConvexHull(Local<String> name, const AccessorInfo& info);
     // GEOS unary predicates
     static Handle<Value> IsEmpty(const Arguments& args);
     static Handle<Value> IsValid(const Arguments& args);

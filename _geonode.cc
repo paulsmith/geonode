@@ -50,6 +50,7 @@ Handle<FunctionTemplate> Geometry::MakeGeometryTemplate()
     obj_t->SetInternalFieldCount(1);
     obj_t->Set(String::NewSymbol("version"), String::New(GEOSversion())); 
     obj_t->SetAccessor(String::NewSymbol("envelope"), GetEnvelope);
+    obj_t->SetAccessor(String::NewSymbol("convexHull"), GetConvexHull);
     obj_t->SetAccessor(String::NewSymbol("srid"), GetSRID, SetSRID);
     obj_t->SetAccessor(String::NewSymbol("type"), GetType);
     obj_t->SetAccessor(String::NewSymbol("area"), GetArea);
@@ -163,17 +164,8 @@ GEONODE_GEOS_BINARY_PREDICATE(Overlaps, overlaps, GEOSOverlaps);
 GEONODE_GEOS_BINARY_PREDICATE(Equals, equals, GEOSEquals);
 // GEONODE_GEOS_BINARY_PREDICATE(EqualsExact, equalsexact, GEOSEqualsExact); FIXME takes tolerance argument
 
-Handle<Value> Geometry::GetEnvelope(Local<String> name, const AccessorInfo& info)
-{
-    HandleScope scope;
-    Geometry *geom = ObjectWrap::Unwrap<Geometry>(info.Holder());
-    GEOSGeometry *geos_env = GEOSEnvelope(geom->geos_geom_);
-    if (geos_env == NULL)
-	return ThrowException(String::New("couldn't get envelope"));
-    Local<Object> geometry_obj = geometry_template_->InstanceTemplate()->NewInstance();
-    (new Geometry(geos_env))->Wrap(geometry_obj);
-    return scope.Close(geometry_obj);
-}
+GEONODE_GEOS_UNARY_TOPOLOGY(GetEnvelope, envelope, GEOSEnvelope);
+GEONODE_GEOS_UNARY_TOPOLOGY(GetConvexHull, convexHull, GEOSConvexHull);
 
 Handle<Value> Geometry::Intersection(const Arguments& args)
 {
