@@ -7,13 +7,11 @@ Example
 
     var geonode = require("geonode");
 
-    var geom = new geonode.Geometry();
-    geom.fromWkt("POINT(1 2)");
-    sys.puts(geom.toWkt());
+    var myPoint = new geonode.Geometry("POINT(1 2)");
+    sys.puts(myPoint.toWkt()); // "POINT (1.0000000000000000 2.0000000000000000)"
 
-    var geom2 = new geonode.Geometry();
-    geom2.fromWkt("POLYGON((0 0, 3 0, 3 3, 0 3, 0 0))");
-    sys.puts(geom2.contains(geom)); // "true"
+    var myPolygon = new geonode.Geometry("POLYGON((0 0, 3 0, 3 3, 0 3, 0 0))");
+    sys.puts(myPolygon.contains(myPoint)); // "true"
 
 Installation
 ------------
