@@ -57,7 +57,7 @@ Handle<FunctionTemplate> Geometry::MakeGeometryTemplate()
     Handle<FunctionTemplate> t = FunctionTemplate::New(New);
     Local<ObjectTemplate> obj_t = t->InstanceTemplate();
     obj_t->SetInternalFieldCount(1);
-    obj_t->Set(String::NewSymbol("version"), String::New(GEOSversion()));
+    obj_t->Set(String::NewSymbol("_geosVersion"), String::New(GEOSversion()));
     obj_t->SetAccessor(String::NewSymbol("envelope"), GetEnvelope);
     obj_t->SetAccessor(String::NewSymbol("convexHull"), GetConvexHull);
     obj_t->SetAccessor(String::NewSymbol("boundary"), GetBoundary);
