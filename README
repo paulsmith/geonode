@@ -1,6 +1,6 @@
 ~ geonode ~
 
-Brings geography to node.js.
+Bringing geography to node.js.
 
 Example
 -------
@@ -27,6 +27,11 @@ TODO
 
 In no particular order:
 
+ - Finish wrapping GEOS C API
+   - Coordinate sequence functions
+   - Geometry constructors
+   - Some topology operations -- polygonize, line merge, etc.
+   - WKB read/write
  - R-Tree index (with asynchronous searches, inserts, updates, deletes)
  - Prepared geometries for faster predicates (contains, intersects, within)
  - GDAL wrapper -- non-blocking reads from datasources

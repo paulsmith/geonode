@@ -88,6 +88,6 @@ assertGeomsEqual(poly.union(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")),
 
 assertGeomsEqual(poly.pointOnSurface, new Geometry("POINT(1 1)"));
 
-    assertGeomsEqual(poly.centroid, new Geometry("POINT(1 1)"));
+assertGeomsEqual(poly.centroid, new Geometry("POINT(1 1)"));
 
 sys.puts("Tests pass!");
