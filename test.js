@@ -15,9 +15,7 @@ var geom = new Geometry();
 
 assertInstanceof(geom, Geometry);
 
-// FIXME this match should be more flexible -- other users probably
-// won't have this exact version of the GEOS C library
-assertEquals(geom._geosVersion, "3.1.1-CAPI-1.6.0");
+assertTrue(/^3\.[0-9.]+-CAPI-1\.[56]\.[0-9]$/.test(geom._geosVersion));
 
 assertEquals(geom.toWkt(), "");
 
