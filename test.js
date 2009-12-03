@@ -3,6 +3,8 @@ process.mixin(require("mjsunit"));
 var geonode = require("./geonode");
 var sys = require("sys");
 
+var rss = process.memoryUsage()["rss"];
+
 function assertGeomsEqual(ga, gb) {
     return assertTrue(ga.equals(gb));
 }
@@ -89,5 +91,7 @@ assertGeomsEqual(poly.union(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")),
 assertGeomsEqual(poly.pointOnSurface, new Geometry("POINT(1 1)"));
 
 assertGeomsEqual(poly.centroid, new Geometry("POINT(1 1)"));
+
+sys.puts("Heap increased by " + ((process.memoryUsage()["rss"] - rss) / 1024) + " KB");
 
 sys.puts("Tests pass!");
