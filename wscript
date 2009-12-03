@@ -23,6 +23,10 @@ def configure(conf):
   geos_includedir = popen("%s --includes" % geos_config).readline().strip()
   conf.env.append_value("CPPPATH_GEOS", geos_includedir)
 
+  conf.env.append_value("LIBPATH_PROJ", "/opt/local/lib")
+  conf.env.append_value("LIB_PROJ", "proj")
+  conf.env.append_value("CPPPATH_PROJ", "/opt/local/include")
+  
   if conf.env['USE_DEBUG']:
     conf.env.append_value('CCFLAGS', ['-DDEBUG', '-g', '-O0', '-Wall'])
     conf.env.append_value('CXXFLAGS', ['-DDEBUG', '-g', '-O0', '-Wall'])
@@ -31,7 +35,7 @@ def build(bld):
   obj = bld.new_task_gen('cxx', 'shlib', 'node_addon')
   obj.target = '_geonode'
   obj.source = "_geonode.cc"
-  obj.uselib = "GEOS"
+  obj.uselib = "GEOS PROJ"
     
 def shutdown():
   # HACK to get _geonode.node out of build directory.

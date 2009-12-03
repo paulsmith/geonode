@@ -90,6 +90,37 @@ assertGeomsEqual(poly.pointOnSurface, new Geometry("POINT(1 1)"));
 
 assertGeomsEqual(poly.centroid, new Geometry("POINT(1 1)"));
 
-sys.puts("Heap increased by " + ((process.memoryUsage()["rss"] - rss) / 1024) + " KB");
+//////////////////////
 
+var Projection = geonode.Projection;
+var lonlat = new Projection("+init=epsg:4326");
+
+// Sanity checks, we're getting good stuff
+assertInstanceof(lonlat, Projection);
+assertEquals(lonlat.definition, " +init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0");
+
+assertThrows('new Projection();');
+assertThrows('new Projection("INVALID_PROJECTION");');
+
+assertThrows('Projection.transform();');
+
+// We're going to use the "World Mercator" projection for testing
+var worldmerc = new Projection("+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+
+// Test Point Projection
+Projection.transform(lonlat, worldmerc, pt);
+assertEquals(pt.toWkt(), "POINT (6378137.0000000000000000 7784829.4924453338608146)");
+
+// Test Line Projection
+var line = new Geometry("LINESTRING(0 0, 1 1)");
+Projection.transform(lonlat, worldmerc, line);
+assertEquals(line.toWkt(), "LINESTRING (0.0000000000000000 0.0000000007081155, 6378137.0000000000000000 7784829.4924453338608146)");
+
+// Test Polygon Projection
+Projection.transform(lonlat, worldmerc, poly);
+assertEquals(poly.toWkt(), "POLYGON ((0.0000000000000000 0.0000000007081155, 0.0000000000000000 2.0000000000000000, 2.0000000000000000 2.0000000000000000, 12756274.0000000000000000 0.0000000007081155, 0.0000000000000000 0.0000000007081155))");
+
+//////////////////////
+
+sys.puts("Heap increased by " + ((process.memoryUsage()["rss"] - rss) / 1024) + " KB");
 sys.puts("Tests pass!");

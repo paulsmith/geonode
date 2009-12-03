@@ -265,12 +265,230 @@ Handle<Value> Geometry::Distance(const Arguments& args)
     return scope.Close(distance_obj);
 }
 
+GEOSGeometry *Geometry::GetGEOSGeometry()
+{
+    return this->geos_geom_;
+}
+
+GEOSCoordSequence *Geometry::ApplyPointTransformationToCoordSequence(PointTransformer *t, const GEOSCoordSequence *seq)
+{
+    GEOSCoordSequence   *ret = GEOSCoordSeq_clone(seq);
+    unsigned int        sz;
+    
+    GEOSCoordSeq_getSize(ret, &sz);
+
+    for (unsigned int i = 0; i < sz; i++) {
+        double x, y;
+
+        GEOSCoordSeq_getX(ret, i, &x);
+        GEOSCoordSeq_getY(ret, i, &y);
+
+        t->Transform(&x, &y, NULL);
+
+        GEOSCoordSeq_setX(ret, i, x);
+        GEOSCoordSeq_setY(ret, i, y);
+    }    
+    
+    return ret;
+}
+
+GEOSGeometry *Geometry::ApplyPointTransformationToSingleGeometry(PointTransformer *t, const GEOSGeometry *g)
+{
+    int             gtype   = GEOSGeomTypeId(g);
+    GEOSGeometry    *ng     = NULL;
+    
+    if (gtype == GEOS_POINT || gtype == GEOS_LINESTRING || gtype == GEOS_LINEARRING) {
+        const GEOSCoordSequence *seq =  GEOSGeom_getCoordSeq(g);
+        GEOSCoordSequence       *nseq = ApplyPointTransformationToCoordSequence(t, seq);
+        
+        // this is silly -- GEOS really needs a shortcut for this
+        if (gtype == GEOS_POINT) {
+            ng = GEOSGeom_createPoint(nseq);
+        }
+        if (gtype == GEOS_LINESTRING) {
+            ng = GEOSGeom_createLineString(nseq);
+        }
+        if (gtype == GEOS_LINEARRING) {
+            ng = GEOSGeom_createLinearRing(nseq);
+        }
+    }
+    else if (gtype == GEOS_POLYGON) {
+        int                 ircnt   = GEOSGetNumInteriorRings(g);
+        const GEOSGeometry  *ext    = GEOSGetExteriorRing(g);
+        GEOSGeometry        *next   = ApplyPointTransformationToSingleGeometry(t, ext);
+        GEOSGeometry        **rings = NULL;
+        
+        if (ircnt > 0) {
+            // This shares a lot in common with the code below in ApplyPointTransformation,
+            // refactor into a single method?
+            rings = new GEOSGeometry *[ircnt];
+            
+            for (int i = 0; i < ircnt; i++) {
+                rings[i] = ApplyPointTransformationToSingleGeometry(t, GEOSGetInteriorRingN(g, i));
+            }
+        }
+        
+        ng = GEOSGeom_createPolygon(next, rings, ircnt);
+        
+        if (rings) {
+            delete rings;
+        }
+    }
+    
+    return ng;
+}
+
+void Geometry::ApplyPointTransformation(PointTransformer *t)
+{
+    GEOSGeometry    *g      = this->geos_geom_;
+    GEOSGeometry    *ng     = NULL;
+    int             gtype   = GEOSGeomTypeId(g);
+    int             gcount  = GEOSGetNumGeometries(g);
+    
+    if (gcount == 1) {
+        ng = ApplyPointTransformationToSingleGeometry(t, g);
+    }
+    else {
+        GEOSGeometry **coll = new GEOSGeometry *[gcount];
+        
+        for (int i = 0; i < gcount; i++) {
+            coll[i] = ApplyPointTransformationToSingleGeometry(t, GEOSGetGeometryN(g, i));
+        }
+        
+        ng = GEOSGeom_createCollection(gtype, coll, gcount);
+        delete coll;
+    }
+    
+    if (ng != NULL) {
+        GEOSGeom_destroy(this->geos_geom_);
+        this->geos_geom_ = ng;
+    }
+}
+
+Projection::Projection(const char* init)
+{
+    this->pj = pj_init_plus(init);
+}
+
+Projection::~Projection()
+{
+    pj_free(this->pj);
+}
+
+bool Projection::IsValid()
+{
+    return (this->pj != NULL);
+}
+
+Persistent<FunctionTemplate> Projection::projection_template_;
+
+Handle<FunctionTemplate> Projection::MakeProjectionTemplate()
+{
+    HandleScope scope;
+    Handle<FunctionTemplate> t = FunctionTemplate::New(New);
+    
+    // Setup "Static" Members
+    t->Set(String::NewSymbol("transform"), FunctionTemplate::New(Transform));
+    
+    // Setup Instance Members
+    Local<ObjectTemplate> obj_t = t->InstanceTemplate();
+    obj_t->SetInternalFieldCount(1);
+    obj_t->Set(String::NewSymbol("__projVersion"), String::New(pj_get_release()));
+    obj_t->SetAccessor(String::NewSymbol("definition"), GetDefinition);
+
+    return scope.Close(t);
+}
+
+void Projection::Initialize(Handle<Object> target)
+{
+    HandleScope scope;
+    if (projection_template_.IsEmpty())
+	    projection_template_ = Persistent<FunctionTemplate>::New(MakeProjectionTemplate());
+    Handle<FunctionTemplate> t = projection_template_;
+    target->Set(String::NewSymbol("Projection"), t->GetFunction());
+}
+
+Handle<Value> Projection::New(const Arguments& args)
+{
+    Projection      *proj;
+    HandleScope     scope;
+    
+    if (args.Length() == 1 && args[0]->IsString()) {
+        String::Utf8Value init(args[0]->ToString());
+        proj = new Projection(*init);
+        
+        if (!proj->IsValid()) {
+            int     *errno          = pj_get_errno_ref();
+            char    *description    = pj_strerrno(*errno);
+            
+            return ThrowException(String::New(description));
+        }
+    }
+    else {
+        return ThrowException(String::New("No valid arguments passed for projection initialization string."));
+    }
+    
+    proj->Wrap(args.This());
+    return args.This();        
+}
+
+Handle<Value> Projection::GetDefinition(Local<String> name, const AccessorInfo& info)
+{
+    HandleScope     scope;
+    Projection      *self = ObjectWrap::Unwrap<Projection>(info.Holder());
+    char            *def;
+    Handle<Value>   def_obj;
+    
+    def = pj_get_def(self->pj, 0);
+    def_obj = String::New(def);
+    
+    pj_dalloc(def);
+    return scope.Close(def_obj);
+}
+
+Handle<Value> Projection::Transform(const Arguments& args)
+{
+    HandleScope     scope;
+    Handle<Value>   geom_obj;
+    
+    if (args.Length() < 3) {
+        return ThrowException(String::New("Not enough arguments."));
+    }
+    else {
+        Projection          *from   = ObjectWrap::Unwrap<Projection>(args[0]->ToObject());
+        Projection          *to     = ObjectWrap::Unwrap<Projection>(args[1]->ToObject());
+        Geometry            *geom   = ObjectWrap::Unwrap<Geometry>(args[2]->ToObject());
+        PointTransformer    *trans  = new ProjectionPointTransformer(from->pj, to->pj);
+        
+        geom->ApplyPointTransformation(trans);
+        
+        delete trans;
+    }
+    
+    return scope.Close(Null());
+}
+
+ProjectionPointTransformer::ProjectionPointTransformer(projPJ from, projPJ to) {
+    this->from = pj_init_plus(pj_get_def(from, 0));
+    this->to = pj_init_plus(pj_get_def(to, 0));
+}
+
+ProjectionPointTransformer::~ProjectionPointTransformer() {
+    pj_free(this->from);
+    pj_free(this->to);
+}
+
+void ProjectionPointTransformer::Transform(double *x, double *y, double *z) {
+    pj_transform(this->from, this->to, 1, 1, x, y, z);
+}
+
 extern "C" void
 init (Handle<Object> target)
 {
     HandleScope scope;
     initGEOS(notice_handler, error_handler);
     Geometry::Initialize(target);
+    Projection::Initialize(target);
 }
 
 // TODO: where to call finishGEOS(); ? Is it even necessary?

@@ -5,6 +5,7 @@
 #include <node.h>
 #include <node_object_wrap.h>
 #include "geos_c.h"
+#include "proj_api.h"
 
 /**
  * A convenience for defining repetitive wrappers of GEOS unary
@@ -75,6 +76,11 @@
 using namespace v8;
 using namespace node;
 
+class PointTransformer {
+ public:
+    virtual void Transform(double *x, double *y, double *z) = 0;
+};
+
 class Geometry : public ObjectWrap {
  public:
     GEOSGeometry *geos_geom_;
@@ -84,6 +90,9 @@ class Geometry : public ObjectWrap {
     ~Geometry();
     static void Initialize(Handle<Object> target);
     bool FromWKT(const char* wkt);
+    
+    GEOSGeometry *GetGEOSGeometry();
+    void ApplyPointTransformation(PointTransformer *t);
 
  protected:
     static Handle<Value> New(const Arguments& args);
@@ -129,4 +138,41 @@ class Geometry : public ObjectWrap {
     static Persistent<FunctionTemplate> geometry_template_;
     static Handle<FunctionTemplate> MakeGeometryTemplate();
     static Handle<Object> WrapNewGEOSGeometry(GEOSGeometry *geos_geom);
+
+    static GEOSGeometry *ApplyPointTransformationToSingleGeometry(PointTransformer *t, const GEOSGeometry *g);
+    static GEOSCoordSequence *ApplyPointTransformationToCoordSequence(PointTransformer *t, const GEOSCoordSequence *seq);
 };
+
+class ProjectionPointTransformer : public PointTransformer {
+ public:
+     ProjectionPointTransformer(projPJ from, projPJ to);
+     ~ProjectionPointTransformer();
+     virtual void Transform(double *x, double *y, double *z);
+     
+ private:
+     projPJ from;
+     projPJ to;
+};
+
+class Projection : public ObjectWrap {
+ public:
+    projPJ pj;
+    
+    Projection(const char* init);
+    ~Projection();
+    
+    bool IsValid();
+    
+    static void Initialize(Handle<Object> target);
+
+ protected:
+    static Handle<Value> New(const Arguments& args);
+    static Handle<Value> GetDefinition(Local<String> name, const AccessorInfo& info);
+    
+    static Handle<Value> Transform(const Arguments& args);
+    
+ private:
+    static Persistent<FunctionTemplate> projection_template_;
+    static Handle<FunctionTemplate> MakeProjectionTemplate();
+};
+
