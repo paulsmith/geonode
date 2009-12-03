@@ -37,7 +37,7 @@ In no particular order:
    - WKB read/write
  - R-Tree index (with asynchronous searches, inserts, updates, deletes)
  - Prepared geometries for faster predicates (contains, intersects, within)
- - GDAL wrapper -- non-blocking reads from datasources
+ - GDAL OGR wrapper -- non-blocking reads from datasources
  - Proj wrapper
  - Better organized unit tests, more coverage
  - GeoJSON read/write
