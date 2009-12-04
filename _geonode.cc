@@ -1,5 +1,6 @@
 /* Copyright 2009 Paul Smith <paulsmith@pobox.com> */
 #include "geonode.h"
+#include <string.h>
 
 /* required functions to initialize GEOS */
 // TODO: what to do here?? Is printing to stderr the best thing to do ... ?
@@ -350,11 +351,18 @@ void Geometry::ApplyPointTransformation(PointTransformer *t)
     }
     else {
         GEOSGeometry **coll = new GEOSGeometry *[gcount];
-        
-        for (int i = 0; i < gcount; i++) {
-            coll[i] = ApplyPointTransformationToSingleGeometry(t, GEOSGetGeometryN(g, i));
+    
+        try {
+            for (int i = 0; i < gcount; i++) {
+                coll[i] = ApplyPointTransformationToSingleGeometry(t, GEOSGetGeometryN(g, i));
+            }
         }
-        
+        catch (TransformerException ex) {
+            // free up our memory before we pass this up.
+            delete coll;
+            throw ex;
+        }
+
         ng = GEOSGeom_createCollection(gtype, coll, gcount);
         delete coll;
     }
@@ -364,6 +372,11 @@ void Geometry::ApplyPointTransformation(PointTransformer *t)
         this->geos_geom_ = ng;
     }
 }
+
+TransformerException::TransformerException(char *description) {
+    strncpy(this->description, description, 1024);
+}
+char *TransformerException::GetDescription() { return this->description; }
 
 Projection::Projection(const char* init)
 {
@@ -460,7 +473,13 @@ Handle<Value> Projection::Transform(const Arguments& args)
         Geometry            *geom   = ObjectWrap::Unwrap<Geometry>(args[2]->ToObject());
         PointTransformer    *trans  = new ProjectionPointTransformer(from->pj, to->pj);
         
-        geom->ApplyPointTransformation(trans);
+        try {
+            geom->ApplyPointTransformation(trans);
+        }
+        catch (TransformerException ex) {
+            delete trans;
+            return ThrowException(String::New(ex.GetDescription()));
+        }
         
         delete trans;
     }
@@ -479,7 +498,21 @@ ProjectionPointTransformer::~ProjectionPointTransformer() {
 }
 
 void ProjectionPointTransformer::Transform(double *x, double *y, double *z) {
-    pj_transform(this->from, this->to, 1, 1, x, y, z);
+    if (pj_is_latlong(this->from)) {
+        *x *= DEG_TO_RAD;
+        *y *= DEG_TO_RAD;   
+    }
+    
+    int err = pj_transform(this->from, this->to, 1, 1, x, y, z);
+    
+    if (pj_is_latlong(this->to)) {
+        *x *= RAD_TO_DEG;
+        *y *= RAD_TO_DEG;
+    }
+    
+    if (err != 0) {
+        throw TransformerException(pj_strerrno(err));
+    }
 }
 
 extern "C" void

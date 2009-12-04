@@ -76,6 +76,15 @@
 using namespace v8;
 using namespace node;
 
+class TransformerException {
+ public: 
+    TransformerException(char *description);
+    char *GetDescription();
+     
+ private:
+    char description[1024];
+};
+
 class PointTransformer {
  public:
     virtual void Transform(double *x, double *y, double *z) = 0;

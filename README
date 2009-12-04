@@ -1,3 +1,32 @@
+PROJ BINDINGS UPDATE NOTES
+--------------------------
+
+* I had to get a tetanus shot because of the rust on my C++ "skills."
+* Currently hardcoded the WAF build script to use /opt/local/* for Proj.
+* Tested against Proj 4.7.0 on MacOS X 10.5.
+* Projection object constructor currently only accepts Proj4 strings.
+* Transformation is currently "in-place," but this can be changed pretty easily.
+
+Code Example
+------------
+
+  var srcProj = new geonode.Projection("+init=epsg:4326");
+  var dstProj = new geonode.Projection("+init=esri:54004")
+
+  sys.puts(srcProj.definition); // " +init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"
+  sys.puts(dstProj.definition); // " +init=esri:54004 +proj=merc +lat_ts=0 +lon_0=0 +k=1.000000 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs +towgs84=0,0,0"
+
+  var myPoint = new geonode.Geometry("POINT(1 2)");
+
+  // transformation is "in-place"
+  geonode.Projection.transform(srcProj, dstProj, myPoint);
+
+  sys.puts(myPoint.toWkt()); // "POINT (111319.4907932735659415 221194.0771677151496988)"
+
+  
+--------------------------
+
+
 ~ geonode ~
 
 Bringing geography to node.js.
@@ -12,6 +41,7 @@ Example
 
     var myPolygon = new geonode.Geometry("POLYGON((0 0, 3 0, 3 3, 0 3, 0 0))");
     sys.puts(myPolygon.contains(myPoint)); // "true"
+
 
 Installation
 ------------
