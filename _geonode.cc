@@ -24,13 +24,20 @@ void error_handler(const char *fmt, ...)
     ThrowException(exception);
 }
 
-Geometry::Geometry() : geos_geom_(0) {}
+Geometry::Geometry() : geos_geom_(0), geos_pg_(0) {}
 
-Geometry::Geometry(GEOSGeometry* geom) : geos_geom_(geom) {}
+Geometry::Geometry(GEOSGeometry* geom)
+{
+    geos_geom_ = geom;
+    if (geos_geom_ != NULL)
+	geos_pg_ = GEOSPrepare(geos_geom_);
+}
 
 Geometry::Geometry(const char* wkt)
 {
     this->FromWKT(wkt);
+    if (geos_geom_ != NULL)
+	geos_pg_ = GEOSPrepare(geos_geom_);
 }
 
 Geometry::~Geometry()
@@ -38,6 +45,8 @@ Geometry::~Geometry()
     // FIXME we also need to release any char* returned from GEOS functions
     if (geos_geom_ != NULL)
 	GEOSGeom_destroy(geos_geom_);
+    if (geos_geom_ != NULL)
+	GEOSPreparedGeom_destroy(geos_pg_);
 }
 
 Persistent<FunctionTemplate> Geometry::geometry_template_;
@@ -98,6 +107,8 @@ void Geometry::Initialize(Handle<Object> target)
     NODE_SET_PROTOTYPE_METHOD(t, "crosses", Crosses);
     NODE_SET_PROTOTYPE_METHOD(t, "within", Within);
     NODE_SET_PROTOTYPE_METHOD(t, "contains", Contains);
+    NODE_SET_PROTOTYPE_METHOD(t, "containsProperly", ContainsProperly);
+    NODE_SET_PROTOTYPE_METHOD(t, "covers", Covers);
     NODE_SET_PROTOTYPE_METHOD(t, "overlaps", Overlaps);
     NODE_SET_PROTOTYPE_METHOD(t, "equals", Equals);
     // NODE_SET_PROTOTYPE_METHOD(t, "equalsexact", EqualsExact); FIXME
@@ -163,13 +174,15 @@ GEONODE_GEOS_UNARY_PREDICATE(IsRing, isRing, GEOSisRing);
 GEONODE_GEOS_UNARY_PREDICATE(HasZ, hasZ, GEOSHasZ);
 GEONODE_GEOS_BINARY_PREDICATE(Disjoint, disjoin, GEOSDisjoint);
 GEONODE_GEOS_BINARY_PREDICATE(Touches, touches, GEOSTouches);
-GEONODE_GEOS_BINARY_PREDICATE(Intersects, intersects, GEOSIntersects);
 GEONODE_GEOS_BINARY_PREDICATE(Crosses, crosses, GEOSCrosses);
 GEONODE_GEOS_BINARY_PREDICATE(Within, within, GEOSWithin);
-GEONODE_GEOS_BINARY_PREDICATE(Contains, contains, GEOSContains);
 GEONODE_GEOS_BINARY_PREDICATE(Overlaps, overlaps, GEOSOverlaps);
 GEONODE_GEOS_BINARY_PREDICATE(Equals, equals, GEOSEquals);
 // GEONODE_GEOS_BINARY_PREDICATE(EqualsExact, equalsexact, GEOSEqualsExact); FIXME takes tolerance argument
+GEONODE_GEOS_PREPARED_GEOM_PREDICATE(Contains, contains, GEOSPreparedContains);
+GEONODE_GEOS_PREPARED_GEOM_PREDICATE(ContainsProperly, containsProperly, GEOSPreparedContainsProperly);
+GEONODE_GEOS_PREPARED_GEOM_PREDICATE(Covers, covers, GEOSPreparedCovers);
+GEONODE_GEOS_PREPARED_GEOM_PREDICATE(Intersects, intersects, GEOSPreparedIntersects);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetEnvelope, envelope, GEOSEnvelope);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetConvexHull, convexHull, GEOSConvexHull);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetBoundary, boundary, GEOSBoundary);

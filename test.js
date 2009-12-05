@@ -56,6 +56,11 @@ assertTrue(poly.intersects(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")));
 assertFalse(poly.intersects(new Geometry("LINESTRING(3 3, 4 4)")));
 assertTrue(poly.intersects(new Geometry("POINT(0 0)")));
 
+assertTrue(poly.containsProperly(pt));
+assertTrue(poly.contains(new Geometry("LINESTRING(0 0, 0 2, 1 1)")));
+assertFalse(poly.containsProperly(new Geometry("LINESTRING(0 0, 0 2, 1 1)")));
+assertTrue(poly.covers(new Geometry("POINT(0 0)")));
+
 poly.srid = 4326;
 assertEquals(poly.srid, 4326);
 

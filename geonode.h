@@ -76,12 +76,33 @@
 	return r ? True() : False();					\
     };
 
+/**
+ * A convenience for defining repetitive wrappers of prepared geometry
+ * GEOS binary predicate functions.
+ */
+#define GEONODE_GEOS_PREPARED_GEOM_PREDICATE(cppmethod, jsmethod, geosfn)	\
+    Handle<Value> Geometry::cppmethod(const Arguments& args)		\
+    {									\
+	Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());	\
+	HandleScope scope;						\
+	if (args.Length() != 1) {					\
+	    return ThrowException(String::New("other geometry required"));	\
+	}								\
+	Geometry *other = ObjectWrap::Unwrap<Geometry>(args[0]->ToObject());	\
+	unsigned char r = geosfn(geom->geos_pg_, other->geos_geom_);	\
+	if (r == 2) {							\
+	    return ThrowException(String::New(#jsmethod"() failed"));	\
+	}								\
+	return r ? True() : False();					\
+    };
+
 using namespace v8;
 using namespace node;
 
 class Geometry : public ObjectWrap {
  public:
     GEOSGeometry *geos_geom_;
+    const GEOSPreparedGeometry *geos_pg_;
     Geometry();
     Geometry(GEOSGeometry* geom);
     Geometry(const char* wkt);
@@ -118,6 +139,8 @@ class Geometry : public ObjectWrap {
     static Handle<Value> Crosses(const Arguments& args);
     static Handle<Value> Within(const Arguments& args);
     static Handle<Value> Contains(const Arguments& args);
+    static Handle<Value> ContainsProperly(const Arguments& args);
+    static Handle<Value> Covers(const Arguments& args);
     static Handle<Value> Overlaps(const Arguments& args);
     static Handle<Value> Equals(const Arguments& args);
     // static Handle<Value> EqualsExact(const Arguments& args); FIXME
