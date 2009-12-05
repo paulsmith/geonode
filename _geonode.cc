@@ -84,6 +84,7 @@ void Geometry::Initialize(Handle<Object> target)
     NODE_SET_PROTOTYPE_METHOD(t, "difference", Difference);
     NODE_SET_PROTOTYPE_METHOD(t, "symDifference", SymDifference);
     NODE_SET_PROTOTYPE_METHOD(t, "union", Union);
+    NODE_SET_PROTOTYPE_METHOD(t, "relate", Relate);
     // Unary predicates
     NODE_SET_PROTOTYPE_METHOD(t, "isEmpty", IsEmpty);
     NODE_SET_PROTOTYPE_METHOD(t, "isValid", IsValid);
@@ -197,6 +198,21 @@ Handle<Value> Geometry::Buffer(const Arguments& args)
 	return ThrowException(String::New("couldn't buffer geometry"));
     Handle<Object> buffer_obj = WrapNewGEOSGeometry(buffer);
     return scope.Close(buffer_obj);
+}
+
+Handle<Value> Geometry::Relate(const Arguments& args)
+{
+    HandleScope scope;
+    if (args.Length() != 1)
+	return ThrowException(String::New("requires other geometry argument"));
+    Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());
+    Geometry *other = ObjectWrap::Unwrap<Geometry>(args[0]->ToObject());
+    char *pattern = GEOSRelate(geom->geos_geom_, other->geos_geom_);
+    if (pattern == NULL)
+	return ThrowException(String::New("couldn't get relate pattern"));
+    Local<Value> pattern_obj = String::New(pattern);
+    GEOSFree(pattern);
+    return scope.Close(pattern_obj);
 }
 
 Handle<Value> Geometry::GetSRID(Local<String> name, const AccessorInfo& info)
