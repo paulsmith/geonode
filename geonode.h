@@ -22,6 +22,10 @@
 	return scope.Close(geometry_obj);				\
     };
 
+/**
+ * A convenience for defining repetitive wrappers of GEOS binary
+ * topology functions which return a new geometry.
+ */
 #define GEONODE_GEOS_BINARY_TOPOLOGY(cppmethod, jsmethod, geosfn)	\
     Handle<Value> Geometry::cppmethod(const Arguments& args)		\
     {									\
