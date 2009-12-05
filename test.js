@@ -92,6 +92,8 @@ assertGeomsEqual(poly.centroid, new Geometry("POINT(1 1)"));
 
 assertEquals(poly.relate(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")), "212101212");
 
+assertTrue(poly.relate(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))"), "212101212"));
+
 sys.puts("Heap increased by " + ((process.memoryUsage()["rss"] - rss) / 1024) + " KB");
 
 sys.puts("Tests pass!");

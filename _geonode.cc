@@ -203,16 +203,28 @@ Handle<Value> Geometry::Buffer(const Arguments& args)
 Handle<Value> Geometry::Relate(const Arguments& args)
 {
     HandleScope scope;
-    if (args.Length() != 1)
-	return ThrowException(String::New("requires other geometry argument"));
     Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());
+    if (args.Length() < 1)
+	return ThrowException(String::New("requires at least one argument"));
     Geometry *other = ObjectWrap::Unwrap<Geometry>(args[0]->ToObject());
-    char *pattern = GEOSRelate(geom->geos_geom_, other->geos_geom_);
-    if (pattern == NULL)
-	return ThrowException(String::New("couldn't get relate pattern"));
-    Local<Value> pattern_obj = String::New(pattern);
-    GEOSFree(pattern);
-    return scope.Close(pattern_obj);
+    if (args.Length() == 1) {
+	// Gets a relation pattern (string) from the two geometries
+	char *pattern = GEOSRelate(geom->geos_geom_, other->geos_geom_);
+	if (pattern == NULL)
+	    return ThrowException(String::New("couldn't get relate pattern"));
+	Local<Value> pattern_obj = String::New(pattern);
+	GEOSFree(pattern);
+	return scope.Close(pattern_obj);
+    } else if (args.Length() == 2) {
+	// Returns a boolean if the two geometries relate according to the pattern argument
+	String::Utf8Value pattern(args[1]->ToString());
+	unsigned char r = GEOSRelatePattern(geom->geos_geom_, other->geos_geom_, *pattern);
+	if (r == 2) {
+	    return ThrowException(String::New("relate by pattern failed"));
+	}
+	return r ? True() : False();
+    }
+    return ThrowException(String::New("invalid number of arguments"));
 }
 
 Handle<Value> Geometry::GetSRID(Local<String> name, const AccessorInfo& info)
