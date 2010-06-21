@@ -1,4 +1,4 @@
-process.mixin(require("mjsunit"));
+var assert = require('assert')
 
 var geonode = require("./geonode");
 var sys = require("sys");
@@ -6,72 +6,72 @@ var sys = require("sys");
 var rss = process.memoryUsage()["rss"];
 
 function assertGeomsEqual(ga, gb) {
-    return assertTrue(ga.equals(gb));
+    return assert.ok(ga.equals(gb));
 }
 
 var Geometry = geonode.Geometry;
 
 var geom = new Geometry();
 
-assertInstanceof(geom, Geometry);
+//assertInstanceof(geom, Geometry);
 
-assertTrue(/^3\.[0-9.]+-CAPI-1\.[56]\.[0-9]$/.test(geom._geosVersion));
+assert.ok(/^3\.[0-9.]+-CAPI-1\.[56]\.[0-9]$/.test(geom._geosVersion));
 
-assertEquals(geom.toWkt(), "");
+assert.equal(geom.toWkt(), "");
 
 geom.fromWkt("POINT(0 0)");
 
 // FIXME this kind of string matching can be fragile with WKTs
-assertEquals(geom.toWkt(), "POINT (0.0000000000000000 0.0000000000000000)");
+assert.equal(geom.toWkt(), "POINT (0.0000000000000000 0.0000000000000000)");
 
 // You can also initialize a Geometry with a WKT passed to the constructor
 var pt = new Geometry("POINT(1 1)");
 
-assertInstanceof(pt, Geometry);
+//assertInstanceof(pt, Geometry);
 
-assertEquals(pt.toWkt(), "POINT (1.0000000000000000 1.0000000000000000)");
+assert.equal(pt.toWkt(), "POINT (1.0000000000000000 1.0000000000000000)");
 
 var poly = new Geometry("POLYGON((0 0, 0 2, 2 2, 2 0, 0 0))");
 
 polyWkt = "POLYGON ((0.0000000000000000 0.0000000000000000, 0.0000000000000000 2.0000000000000000, 2.0000000000000000 2.0000000000000000, 2.0000000000000000 0.0000000000000000, 0.0000000000000000 0.0000000000000000))";
 
-assertEquals(poly.toWkt(), polyWkt);
+assert.equal(poly.toWkt(), polyWkt);
 
-assertThrows("new Geometry(\"SOMEGROSSLYINVALIDWKT\")");
-assertThrows("var g = new Geometry(); g.fromWkt(\"SOMEGROSSLYINVALIDWKT\")");
+assert.throws("new Geometry(\"SOMEGROSSLYINVALIDWKT\")");
+assert.throws("var g = new Geometry(); g.fromWkt(\"SOMEGROSSLYINVALIDWKT\")");
 
-assertTrue(poly.contains(pt));
-assertFalse(pt.contains(poly));
-assertFalse(poly.contains(new Geometry("POINT(3 3)")));
+assert.ok(poly.contains(pt));
+assert.ok(!pt.contains(poly));
+assert.ok(!poly.contains(new Geometry("POINT(3 3)")));
 
-assertTrue(!poly.isEmpty());
-assertTrue(new Geometry("POINT EMPTY").isEmpty());
+assert.ok(!poly.isEmpty());
+assert.ok(new Geometry("POINT EMPTY").isEmpty());
 
-assertTrue(poly.isValid());
-assertFalse(new Geometry("POLYGON((0 0, 2 2, 0 2, 2 0, 0 0))").isValid());
+assert.ok(poly.isValid());
+assert.ok(!new Geometry("POLYGON((0 0, 2 2, 0 2, 2 0, 0 0))").isValid());
 
-assertTrue(poly.isSimple());
+assert.ok(poly.isSimple());
 
-assertTrue(poly.intersects(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")));
-assertFalse(poly.intersects(new Geometry("LINESTRING(3 3, 4 4)")));
-assertTrue(poly.intersects(new Geometry("POINT(0 0)")));
+assert.ok(poly.intersects(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")));
+assert.ok(!poly.intersects(new Geometry("LINESTRING(3 3, 4 4)")));
+assert.ok(poly.intersects(new Geometry("POINT(0 0)")));
 
-assertTrue(poly.containsProperly(pt));
-assertTrue(poly.contains(new Geometry("LINESTRING(0 0, 0 2, 1 1)")));
-assertFalse(poly.containsProperly(new Geometry("LINESTRING(0 0, 0 2, 1 1)")));
-assertTrue(poly.covers(new Geometry("POINT(0 0)")));
+assert.ok(poly.containsProperly(pt));
+assert.ok(poly.contains(new Geometry("LINESTRING(0 0, 0 2, 1 1)")));
+assert.ok(!poly.containsProperly(new Geometry("LINESTRING(0 0, 0 2, 1 1)")));
+assert.ok(poly.covers(new Geometry("POINT(0 0)")));
 
 poly.srid = 4326;
-assertEquals(poly.srid, 4326);
+assert.equal(poly.srid, 4326);
 
-assertEquals(poly.type, "Polygon");
-assertEquals(new Geometry("POINT(0 0)").type, "Point");
+assert.equal(poly.type, "Polygon");
+assert.equal(new Geometry("POINT(0 0)").type, "Point");
 
-assertEquals(poly.area, 4);
+assert.equal(poly.area, 4);
 
-assertEquals(new Geometry("LINESTRING(0 0, 1 1)").length, Math.sqrt(2));
+assert.equal(new Geometry("LINESTRING(0 0, 1 1)").length, Math.sqrt(2));
 
-assertEquals(new Geometry("POINT(0 0)").distance(new Geometry("POINT(1 1)")), Math.sqrt(2));
+assert.equal(new Geometry("POINT(0 0)").distance(new Geometry("POINT(1 1)")), Math.sqrt(2));
 
 assertGeomsEqual(new Geometry("POLYGON((0 1, 1 0, 2 1, 1 2, 0 1))").envelope, new Geometry("POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))"));
 
@@ -95,9 +95,9 @@ assertGeomsEqual(poly.pointOnSurface, new Geometry("POINT(1 1)"));
 
 assertGeomsEqual(poly.centroid, new Geometry("POINT(1 1)"));
 
-assertEquals(poly.relate(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")), "212101212");
+assert.equal(poly.relate(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")), "212101212");
 
-assertTrue(poly.relate(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))"), "212101212"));
+assert.ok(poly.relate(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))"), "212101212"));
 
 sys.puts("Heap increased by " + ((process.memoryUsage()["rss"] - rss) / 1024) + " KB");
 
