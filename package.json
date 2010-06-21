@@ -1,0 +1,22 @@
+{
+  "name": "geonode",
+  "description": "Geography for Node.js",
+  "version": "0.0.1",
+  "keywords": [ "geography", "geo", "gis", "geos", "client" ],
+  "author": "Paul Smith <paulsmith@pobox.com>",
+  "contributors": [
+    { "name": "Paul Smith", "web": "http://pauladamsmith.com" }
+  ],
+  "licenses": [ "MIT" ],
+  "repositories": {
+    "type": "git",
+    "url": "http://github.com/paulsmith/geonode.git"
+  },
+  "bugs": { "web": "http://github.com/paulsmith/geonode/issues" },
+  "directories": {},
+  "os": [ "linux", "darwin" ],
+  "dependencies": {},
+  "engines": { "node":  ">0.1.90" },
+  "main": "./geonode",
+  "scripts": { "install": "node-waf configure build" }
+}
