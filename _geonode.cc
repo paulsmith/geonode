@@ -111,7 +111,7 @@ void Geometry::Initialize(Handle<Object> target)
     NODE_SET_PROTOTYPE_METHOD(t, "covers", Covers);
     NODE_SET_PROTOTYPE_METHOD(t, "overlaps", Overlaps);
     NODE_SET_PROTOTYPE_METHOD(t, "equals", Equals);
-    // NODE_SET_PROTOTYPE_METHOD(t, "equalsexact", EqualsExact); FIXME
+    NODE_SET_PROTOTYPE_METHOD(t, "equalsExact", EqualsExact);
 
     NODE_SET_PROTOTYPE_METHOD(t, "distance", Distance);
 
@@ -178,7 +178,7 @@ GEONODE_GEOS_BINARY_PREDICATE(Crosses, crosses, GEOSCrosses);
 GEONODE_GEOS_BINARY_PREDICATE(Within, within, GEOSWithin);
 GEONODE_GEOS_BINARY_PREDICATE(Overlaps, overlaps, GEOSOverlaps);
 GEONODE_GEOS_BINARY_PREDICATE(Equals, equals, GEOSEquals);
-// GEONODE_GEOS_BINARY_PREDICATE(EqualsExact, equalsexact, GEOSEqualsExact); FIXME takes tolerance argument
+GEONODE_GEOS_BINARY_PREDICATE_TOLERANCE(EqualsExact, equalsExact, GEOSEqualsExact);
 GEONODE_GEOS_PREPARED_GEOM_PREDICATE(Contains, contains, GEOSPreparedContains);
 GEONODE_GEOS_PREPARED_GEOM_PREDICATE(ContainsProperly, containsProperly, GEOSPreparedContainsProperly);
 GEONODE_GEOS_PREPARED_GEOM_PREDICATE(Covers, covers, GEOSPreparedCovers);

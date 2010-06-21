@@ -13,67 +13,88 @@
 #define GEONODE_GEOS_UNARY_TOPOLOGY(cppmethod, jsmethod, geosfn)                    \
     Handle<Value> Geometry::cppmethod(Local<String> name, const AccessorInfo& info) \
     {                                                                               \
-    HandleScope scope;                                                              \
-    Geometry *geom = ObjectWrap::Unwrap<Geometry>(info.Holder());                   \
-    GEOSGeometry *geos_geom = geosfn(geom->geos_geom_);                             \
-    if (geos_geom == NULL)                                                          \
-        return ThrowException(String::New("couldn't get "#jsmethod));               \
-    Handle<Object> geometry_obj = WrapNewGEOSGeometry(geos_geom);                   \
-    return scope.Close(geometry_obj);                                               \
+        HandleScope scope;                                                          \
+        Geometry *geom = ObjectWrap::Unwrap<Geometry>(info.Holder());               \
+        GEOSGeometry *geos_geom = geosfn(geom->geos_geom_);                         \
+        if (geos_geom == NULL)                                                      \
+            return ThrowException(String::New("couldn't get "#jsmethod));           \
+        Handle<Object> geometry_obj = WrapNewGEOSGeometry(geos_geom);               \
+        return scope.Close(geometry_obj);                                           \
     };
 
 /**
  * A convenience for defining repetitive wrappers of GEOS binary
  * topology functions which return a new geometry.
  */
-#define GEONODE_GEOS_BINARY_TOPOLOGY(cppmethod, jsmethod, geosfn)               \
-    Handle<Value> Geometry::cppmethod(const Arguments& args)                    \
-    {                                                                           \
-    HandleScope scope;                                                          \
-    if (args.Length() != 1)                                                     \
-        return ThrowException(String::New("requires other geometry argument")); \
-    Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());                 \
-    Geometry *other = ObjectWrap::Unwrap<Geometry>(args[0]->ToObject());        \
-    GEOSGeometry *geos_geom = geosfn(geom->geos_geom_, other->geos_geom_);      \
-    if (geos_geom == NULL)                                                      \
-        return ThrowException(String::New("couldn't get "#jsmethod));           \
-    Handle<Object> geometry_obj = WrapNewGEOSGeometry(geos_geom);               \
-    return scope.Close(geometry_obj);                                           \
+#define GEONODE_GEOS_BINARY_TOPOLOGY(cppmethod, jsmethod, geosfn)                   \
+    Handle<Value> Geometry::cppmethod(const Arguments& args)                        \
+    {                                                                               \
+        HandleScope scope;                                                          \
+        if (args.Length() != 1)                                                     \
+            return ThrowException(String::New("requires other geometry argument")); \
+        Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());                 \
+        Geometry *other = ObjectWrap::Unwrap<Geometry>(args[0]->ToObject());        \
+        GEOSGeometry *geos_geom = geosfn(geom->geos_geom_, other->geos_geom_);      \
+        if (geos_geom == NULL)                                                      \
+            return ThrowException(String::New("couldn't get "#jsmethod));           \
+        Handle<Object> geometry_obj = WrapNewGEOSGeometry(geos_geom);               \
+        return scope.Close(geometry_obj);                                           \
     };
 
 /**
  * A convenience for defining repetitive wrappers of GEOS unary
  * predicate functions.
  */
-#define GEONODE_GEOS_UNARY_PREDICATE(cppmethod, jsmethod, geosfn)   \
-    Handle<Value> Geometry::cppmethod(const Arguments& args)        \
-    {                                                               \
-    Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());     \
-    HandleScope scope;                                              \
-    unsigned char r = geosfn(geom->geos_geom_);                     \
-    if (r == 2)                                                     \
-        return ThrowException(String::New(#jsmethod"() failed"));   \
-    return r ? True() : False();                                    \
+#define GEONODE_GEOS_UNARY_PREDICATE(cppmethod, jsmethod, geosfn)       \
+    Handle<Value> Geometry::cppmethod(const Arguments& args)            \
+    {                                                                   \
+        Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());     \
+        HandleScope scope;                                              \
+        unsigned char r = geosfn(geom->geos_geom_);                     \
+        if (r == 2)                                                     \
+            return ThrowException(String::New(#jsmethod"() failed"));   \
+        return r ? True() : False();                                    \
     };
 
 /**
  * A convenience for defining repetitive wrappers of GEOS binary
  * predicate functions.
  */
-#define GEONODE_GEOS_BINARY_PREDICATE(cppmethod, jsmethod, geosfn)      \
-    Handle<Value> Geometry::cppmethod(const Arguments& args)            \
-    {                                                                   \
-    Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());         \
-    HandleScope scope;                                                  \
-    if (args.Length() != 1) {                                           \
-        return ThrowException(String::New("other geometry required"));  \
-    }                                                                   \
-    Geometry *other = ObjectWrap::Unwrap<Geometry>(args[0]->ToObject());\
-    unsigned char r = geosfn(geom->geos_geom_, other->geos_geom_);      \
-    if (r == 2) {                                                       \
-        return ThrowException(String::New(#jsmethod"() failed"));       \
-    }                                                                   \
-    return r ? True() : False();                                        \
+#define GEONODE_GEOS_BINARY_PREDICATE(cppmethod, jsmethod, geosfn)          \
+    Handle<Value> Geometry::cppmethod(const Arguments& args)                \
+    {                                                                       \
+        Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());         \
+        HandleScope scope;                                                  \
+        if (args.Length() != 1) {                                           \
+            return ThrowException(String::New("other geometry required"));  \
+        }                                                                   \
+        Geometry *other = ObjectWrap::Unwrap<Geometry>(args[0]->ToObject());\
+        unsigned char r = geosfn(geom->geos_geom_, other->geos_geom_);      \
+        if (r == 2) {                                                       \
+            return ThrowException(String::New(#jsmethod"() failed"));       \
+        }                                                                   \
+        return r ? True() : False();                                        \
+    };
+
+/**
+ * A convenience for defining repetitive wrappers of GEOS binary
+ * predicate functions with tolerance.
+ */
+#define GEONODE_GEOS_BINARY_PREDICATE_TOLERANCE(cppmethod, jsmethod, geosfn)            \
+    Handle<Value> Geometry::cppmethod(const Arguments& args)                            \
+    {                                                                                   \
+        Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());                     \
+        HandleScope scope;                                                              \
+        if (args.Length() != 2) {                                                       \
+            return ThrowException(String::New("other geometry and tolerance required"));\
+        }                                                                               \
+        Geometry *other = ObjectWrap::Unwrap<Geometry>(args[0]->ToObject());            \
+        double tolerance = args[1]->NumberValue();                                      \
+        unsigned char r = geosfn(geom->geos_geom_, other->geos_geom_, tolerance);       \
+        if (r == 2) {                                                                   \
+            return ThrowException(String::New(#jsmethod"() failed"));                   \
+        }                                                                               \
+        return r ? True() : False();                                                    \
     };
 
 /**
@@ -83,17 +104,17 @@
 #define GEONODE_GEOS_PREPARED_GEOM_PREDICATE(cppmethod, jsmethod, geosfn)   \
     Handle<Value> Geometry::cppmethod(const Arguments& args)                \
     {                                                                       \
-    Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());             \
-    HandleScope scope;                                                      \
-    if (args.Length() != 1) {                                               \
-        return ThrowException(String::New("other geometry required"));      \
-    }                                                                       \
-    Geometry *other = ObjectWrap::Unwrap<Geometry>(args[0]->ToObject());    \
-    unsigned char r = geosfn(geom->geos_pg_, other->geos_geom_);            \
-    if (r == 2) {                                                           \
-        return ThrowException(String::New(#jsmethod"() failed"));           \
-    }                                                                       \
-    return r ? True() : False();                                            \
+        Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());         \
+        HandleScope scope;                                                  \
+        if (args.Length() != 1) {                                           \
+            return ThrowException(String::New("other geometry required"));  \
+        }                                                                   \
+        Geometry *other = ObjectWrap::Unwrap<Geometry>(args[0]->ToObject());\
+        unsigned char r = geosfn(geom->geos_pg_, other->geos_geom_);        \
+        if (r == 2) {                                                       \
+            return ThrowException(String::New(#jsmethod"() failed"));       \
+        }                                                                   \
+        return r ? True() : False();                                        \
     };
 
 using namespace v8;
@@ -143,7 +164,7 @@ class Geometry : public ObjectWrap {
     static Handle<Value> Covers(const Arguments& args);
     static Handle<Value> Overlaps(const Arguments& args);
     static Handle<Value> Equals(const Arguments& args);
-    // static Handle<Value> EqualsExact(const Arguments& args); FIXME
+    static Handle<Value> EqualsExact(const Arguments& args);
     // GEOS geometry info
     static Handle<Value> GetSRID(Local<String> name, const AccessorInfo& info);
     static void SetSRID(Local<String> name, Local<Value> value, const AccessorInfo& info);
