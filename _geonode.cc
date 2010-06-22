@@ -94,6 +94,7 @@ void Geometry::Initialize(Handle<Object> target)
     NODE_SET_PROTOTYPE_METHOD(t, "symDifference", SymDifference);
     NODE_SET_PROTOTYPE_METHOD(t, "union", Union);
     NODE_SET_PROTOTYPE_METHOD(t, "relate", Relate);
+    NODE_SET_PROTOTYPE_METHOD(t, "simplify", Simplify);
     // Unary predicates
     NODE_SET_PROTOTYPE_METHOD(t, "isEmpty", IsEmpty);
     NODE_SET_PROTOTYPE_METHOD(t, "isValid", IsValid);
@@ -188,6 +189,7 @@ GEONODE_GEOS_UNARY_TOPOLOGY(GetConvexHull, convexHull, GEOSConvexHull);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetBoundary, boundary, GEOSBoundary);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetPointOnSurface, pointOnSurface, GEOSPointOnSurface);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetCentroid, centroid, GEOSGetCentroid);
+GEONODE_GEOS_UNARY_TOPOLOGY_TOLERANCE(Simplify, simplify, GEOSSimplify);
 GEONODE_GEOS_BINARY_TOPOLOGY(Intersection, intersection, GEOSIntersection);
 GEONODE_GEOS_BINARY_TOPOLOGY(Difference, difference, GEOSDifference);
 GEONODE_GEOS_BINARY_TOPOLOGY(SymDifference, symDifference, GEOSSymDifference);

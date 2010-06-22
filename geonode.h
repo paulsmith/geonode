@@ -21,6 +21,25 @@
         Handle<Object> geometry_obj = WrapNewGEOSGeometry(geos_geom);               \
         return scope.Close(geometry_obj);                                           \
     };
+    
+/**
+ * A convenience for defining repetitive wrappers of GEOS unary
+ * topology functions with tolerance which return a new geometry.
+ */
+#define GEONODE_GEOS_UNARY_TOPOLOGY_TOLERANCE(cppmethod, jsmethod, geosfn)          \
+    Handle<Value> Geometry::cppmethod(const Arguments& args)                        \
+    {                                                                               \
+        HandleScope scope;                                                          \
+        if (args.Length() != 1)                                                     \
+            return ThrowException(String::New("requires tolerance argument"));      \
+        Geometry *geom = ObjectWrap::Unwrap<Geometry>(args.This());                 \
+        double tolerance = args[0]->NumberValue();                                  \
+        GEOSGeometry *geos_geom = geosfn(geom->geos_geom_, tolerance);              \
+        if (geos_geom == NULL)                                                      \
+            return ThrowException(String::New("couldn't get "#jsmethod));           \
+        Handle<Object> geometry_obj = WrapNewGEOSGeometry(geos_geom);               \
+        return scope.Close(geometry_obj);                                           \
+    };
 
 /**
  * A convenience for defining repetitive wrappers of GEOS binary
@@ -147,6 +166,7 @@ class Geometry : public ObjectWrap {
     static Handle<Value> GetPointOnSurface(Local<String> name, const AccessorInfo& info);
     static Handle<Value> GetCentroid(Local<String> name, const AccessorInfo& info);
     static Handle<Value> Relate(const Arguments& args);
+    static Handle<Value> Simplify(const Arguments& args);
     // GEOS unary predicates
     static Handle<Value> IsEmpty(const Arguments& args);
     static Handle<Value> IsValid(const Arguments& args);
