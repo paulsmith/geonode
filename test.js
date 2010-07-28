@@ -1,9 +1,9 @@
-var assert = require('assert')
+var assert = require('assert');
 
 var geonode = require("./geonode");
 var sys = require("sys");
 
-var rss = process.memoryUsage()["rss"];
+var rss = process.memoryUsage().rss;
 
 function assertGeomsEquals(ga, gb) {
     return assert.ok(ga.equals(gb));
@@ -106,6 +106,6 @@ assert.equal(poly.relate(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")), "2
 
 assert.ok(poly.relate(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))"), "212101212"));
 
-sys.puts("Heap increased by " + ((process.memoryUsage()["rss"] - rss) / 1024) + " KB");
+sys.puts("Heap increased by " + ((process.memoryUsage().rss - rss) / 1024) + " KB");
 
 sys.puts("Tests pass!");
