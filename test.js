@@ -17,7 +17,7 @@ var Geometry = geonode.Geometry;
 
 var geom = new Geometry();
 
-//assertInstanceof(geom, Geometry);
+assert.ok(geom instanceof Geometry);
 
 assert.ok(/^3\.[0-9.]+-CAPI-1\.[56]\.[0-9]$/.test(geom._geosVersion));
 
@@ -31,7 +31,7 @@ assert.equal(geom.toWkt(), "POINT (0.0000000000000000 0.0000000000000000)");
 // You can also initialize a Geometry with a WKT passed to the constructor
 var pt = new Geometry("POINT(1 1)");
 
-//assertInstanceof(pt, Geometry);
+assert.ok(pt instanceof Geometry);
 
 assert.equal(pt.toWkt(), "POINT (1.0000000000000000 1.0000000000000000)");
 
@@ -44,9 +44,9 @@ assert.equal(poly.toWkt(), polyWkt);
 assert.throws("new Geometry(\"SOMEGROSSLYINVALIDWKT\")");
 assert.throws("var g = new Geometry(); g.fromWkt(\"SOMEGROSSLYINVALIDWKT\")");
 
-assert.ok(poly.contains(pt));
-assert.ok(!pt.contains(poly));
-assert.ok(!poly.contains(new Geometry("POINT(3 3)")));
+assert.ok(poly.preparedContains(pt));
+assert.ok(!pt.preparedContains(poly));
+assert.ok(!poly.preparedContains(new Geometry("POINT(3 3)")));
 
 assert.ok(!poly.isEmpty());
 assert.ok(new Geometry("POINT EMPTY").isEmpty());
@@ -56,14 +56,14 @@ assert.ok(!new Geometry("POLYGON((0 0, 2 2, 0 2, 2 0, 0 0))").isValid());
 
 assert.ok(poly.isSimple());
 
-assert.ok(poly.intersects(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")));
-assert.ok(!poly.intersects(new Geometry("LINESTRING(3 3, 4 4)")));
-assert.ok(poly.intersects(new Geometry("POINT(0 0)")));
+assert.ok(poly.preparedIntersects(new Geometry("POLYGON((1 1, 1 3, 3 3, 3 1, 1 1))")));
+assert.ok(!poly.preparedIntersects(new Geometry("LINESTRING(3 3, 4 4)")));
+assert.ok(poly.preparedIntersects(new Geometry("POINT(0 0)")));
 
-assert.ok(poly.containsProperly(pt));
-assert.ok(poly.contains(new Geometry("LINESTRING(0 0, 0 2, 1 1)")));
-assert.ok(!poly.containsProperly(new Geometry("LINESTRING(0 0, 0 2, 1 1)")));
-assert.ok(poly.covers(new Geometry("POINT(0 0)")));
+assert.ok(poly.preparedContainsProperly(pt));
+assert.ok(poly.preparedContains(new Geometry("LINESTRING(0 0, 0 2, 1 1)")));
+assert.ok(!poly.preparedContainsProperly(new Geometry("LINESTRING(0 0, 0 2, 1 1)")));
+assert.ok(poly.preparedCovers(new Geometry("POINT(0 0)")));
 
 poly.srid = 4326;
 assert.equal(poly.srid, 4326);

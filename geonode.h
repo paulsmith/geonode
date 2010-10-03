@@ -176,13 +176,14 @@ class Geometry : public ObjectWrap {
     // GEOS binary predicates
     static Handle<Value> Disjoint(const Arguments& args);
     static Handle<Value> Touches(const Arguments& args);
-    static Handle<Value> Intersects(const Arguments& args);
+    static Handle<Value> PreparedIntersects(const Arguments& args);
     static Handle<Value> Crosses(const Arguments& args);
     static Handle<Value> Within(const Arguments& args);
-    static Handle<Value> Contains(const Arguments& args);
-    static Handle<Value> ContainsProperly(const Arguments& args);
-    static Handle<Value> Covers(const Arguments& args);
+    static Handle<Value> PreparedContains(const Arguments& args);
+    static Handle<Value> PreparedContainsProperly(const Arguments& args);
+    static Handle<Value> PreparedCovers(const Arguments& args);
     static Handle<Value> Overlaps(const Arguments& args);
+    static Handle<Value> Contains(const Arguments& args);
     static Handle<Value> Equals(const Arguments& args);
     static Handle<Value> EqualsExact(const Arguments& args);
     // GEOS geometry info

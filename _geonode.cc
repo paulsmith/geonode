@@ -104,13 +104,14 @@ void Geometry::Initialize(Handle<Object> target)
     // Binary predicates
     NODE_SET_PROTOTYPE_METHOD(t, "disjoint", Disjoint);
     NODE_SET_PROTOTYPE_METHOD(t, "touches", Touches);
-    NODE_SET_PROTOTYPE_METHOD(t, "intersects", Intersects);
+    NODE_SET_PROTOTYPE_METHOD(t, "preparedIntersects", PreparedIntersects);
     NODE_SET_PROTOTYPE_METHOD(t, "crosses", Crosses);
     NODE_SET_PROTOTYPE_METHOD(t, "within", Within);
-    NODE_SET_PROTOTYPE_METHOD(t, "contains", Contains);
-    NODE_SET_PROTOTYPE_METHOD(t, "containsProperly", ContainsProperly);
-    NODE_SET_PROTOTYPE_METHOD(t, "covers", Covers);
+    NODE_SET_PROTOTYPE_METHOD(t, "preparedContains", PreparedContains);
+    NODE_SET_PROTOTYPE_METHOD(t, "preparedContainsProperly", PreparedContainsProperly);
+    NODE_SET_PROTOTYPE_METHOD(t, "preparedCovers", PreparedCovers);
     NODE_SET_PROTOTYPE_METHOD(t, "overlaps", Overlaps);
+    NODE_SET_PROTOTYPE_METHOD(t, "contains", Contains);
     NODE_SET_PROTOTYPE_METHOD(t, "equals", Equals);
     NODE_SET_PROTOTYPE_METHOD(t, "equalsExact", EqualsExact);
 
@@ -178,12 +179,13 @@ GEONODE_GEOS_BINARY_PREDICATE(Touches, touches, GEOSTouches);
 GEONODE_GEOS_BINARY_PREDICATE(Crosses, crosses, GEOSCrosses);
 GEONODE_GEOS_BINARY_PREDICATE(Within, within, GEOSWithin);
 GEONODE_GEOS_BINARY_PREDICATE(Overlaps, overlaps, GEOSOverlaps);
+GEONODE_GEOS_BINARY_PREDICATE(Contains, contains, GEOSContains);
 GEONODE_GEOS_BINARY_PREDICATE(Equals, equals, GEOSEquals);
 GEONODE_GEOS_BINARY_PREDICATE_TOLERANCE(EqualsExact, equalsExact, GEOSEqualsExact);
-GEONODE_GEOS_PREPARED_GEOM_PREDICATE(Contains, contains, GEOSPreparedContains);
-GEONODE_GEOS_PREPARED_GEOM_PREDICATE(ContainsProperly, containsProperly, GEOSPreparedContainsProperly);
-GEONODE_GEOS_PREPARED_GEOM_PREDICATE(Covers, covers, GEOSPreparedCovers);
-GEONODE_GEOS_PREPARED_GEOM_PREDICATE(Intersects, intersects, GEOSPreparedIntersects);
+GEONODE_GEOS_PREPARED_GEOM_PREDICATE(PreparedContains, preparedContains, GEOSPreparedContains);
+GEONODE_GEOS_PREPARED_GEOM_PREDICATE(PreparedContainsProperly, preparedContainsProperly, GEOSPreparedContainsProperly);
+GEONODE_GEOS_PREPARED_GEOM_PREDICATE(PreparedCovers, preparedCovers, GEOSPreparedCovers);
+GEONODE_GEOS_PREPARED_GEOM_PREDICATE(PreparedIntersects, preparedIntersects, GEOSPreparedIntersects);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetEnvelope, envelope, GEOSEnvelope);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetConvexHull, convexHull, GEOSConvexHull);
 GEONODE_GEOS_UNARY_TOPOLOGY(GetBoundary, boundary, GEOSBoundary);
