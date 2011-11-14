@@ -12,7 +12,7 @@ var geom = new Geometry();
 
 assert.ok(geom instanceof Geometry);
 
-assert.ok(/^3\.[0-9.]+-CAPI-1\.[56]\.[0-9]$/.test(geom._geosVersion));
+assert.ok(/^3\.[0-9.]+-CAPI-1\.[567]\.[0-9]$/.test(geom._geosVersion));
 
 assert.equal(geom.toWkt(), "");
 
